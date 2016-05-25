@@ -1,0 +1,16 @@
+Index: linux-3.18.23/Kconfig
+===================================================================
+--- linux-3.18.23.orig/Kconfig
++++ linux-3.18.23/Kconfig
+@@ -8,4 +8,11 @@ config SRCARCH
+ 	string
+ 	option env="SRCARCH"
+ 
++config SUPPORT_OPENWRT
++	bool "Support OpenWrt"
++	default n
++
++config RALINK_MT7628
++	bool "support 7628"
++	default n
+ source "arch/$SRCARCH/Kconfig"
