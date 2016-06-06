@@ -45,6 +45,7 @@ define Package/switch
   CATEGORY:=MTK Properties
   TITLE:=Command to config switch
   SUBMENU:=Applications
+  DEPENDS:=+kmod-rdm
 endef
 
 define Package/switch/description
@@ -58,6 +59,10 @@ endef
 
 TARGET_CFLAGS += \
 	-I$(LINUX_DIR)/drivers/net/raeth
+	
+TARGET_CFLAGS += \
+	-I$(LINUX_DIR)/arch/$(LINUX_KARCH)/include \
+	-I$(LINUX_DIR)/drivers/net/rt_rdm
 
 define Build/Configure
 endef
@@ -66,24 +71,6 @@ define Package/switch/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/lib/network
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/switch $(1)/usr/bin
-ifeq ($(CONFIG_TARGET_ramips_mt7620),y)
-	$(INSTALL_BIN) ./files/switch-7620.sh $(1)/lib/network/switch.sh
-endif
-ifeq ($(CONFIG_TARGET_ramips_mt7628),y)
-	$(INSTALL_BIN) ./files/switch-7628.sh $(1)/lib/network/switch.sh
-endif
-ifeq ($(CONFIG_TARGET_ramips_mt7688),y)
-	$(INSTALL_BIN) ./files/switch-7628.sh $(1)/lib/network/switch.sh
-endif
-ifeq ($(CONFIG_TARGET_ramips_mt7621),y)
-	$(INSTALL_BIN) ./files/switch-7621.sh $(1)/lib/network/switch.sh
-endif
-ifeq ($(CONFIG_TARGET_mediatek_mt7623_emmc),y)
-	$(INSTALL_BIN) ./files/switch-7623.sh $(1)/lib/network/switch.sh
-endif
-ifeq ($(CONFIG_TARGET_mediatek_mt7623_mtd),y)
-	$(INSTALL_BIN) ./files/switch-7623.sh $(1)/lib/network/switch.sh
-endif
 endef
 
 $(eval $(call BuildPackage,switch))

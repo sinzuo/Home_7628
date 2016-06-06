@@ -9,7 +9,8 @@ else
 ifeq ($(CONFIG_ARCH_MT7623),y)
 SRC=switch_gsw.c
 else
-SRC=switch.c
+#SRC=switch.c
+SRC=switch_7628.c
 endif
 endif
 endif
