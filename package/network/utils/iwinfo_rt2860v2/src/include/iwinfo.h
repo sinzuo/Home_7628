@@ -177,11 +177,13 @@ struct iwinfo_ops {
 	int (*scanlist)(const char *, char *, int *);
 	int (*freqlist)(const char *, char *, int *);
 	int (*countrylist)(const char *, char *, int *);
+	int (*lookup_phy)(const char *, char *);
 	void (*close)(void);
 };
 
 const char * iwinfo_type(const char *ifname);
 const struct iwinfo_ops * iwinfo_backend(const char *ifname);
+const struct iwinfo_ops * iwinfo_backend_by_name(const char *name);
 void iwinfo_finish(void);
 
 extern const struct iwinfo_ops wext_ops;

@@ -7,7 +7,8 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libiwinfo
-PKG_RELEASE:=51
+PKG_VERSION:=2014-06-01
+PKG_RELEASE:=1
 
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
 PKG_CONFIG_DEPENDS := \
@@ -24,7 +25,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/libiwinfo
   SECTION:=libs
   CATEGORY:=Libraries
-  TITLE:=Generalized Wireless Information Library (iwinfo)
+  TITLE:=Generalized Wireless Information Library (iwinfo, support mtk)
   DEPENDS:=+PACKAGE_kmod-mac80211:libnl-tiny
   ABI_VERSION:=$(PKG_RELEASE)
   MAINTAINER:=Jo-Philipp Wich <xm@subsignal.org>
@@ -40,7 +41,7 @@ define Package/libiwinfo-lua
   SUBMENU:=Lua
   SECTION:=lang
   CATEGORY:=Languages
-  TITLE:=libiwinfo Lua binding
+  TITLE:=libiwinfo Lua binding(support mtk)
   DEPENDS:=+libiwinfo +liblua
   MAINTAINER:=Jo-Philipp Wich <xm@subsignal.org>
 endef
@@ -54,7 +55,7 @@ endef
 define Package/iwinfo
   SECTION:=utils
   CATEGORY:=Utilities
-  TITLE:=Generalized Wireless Information utility
+  TITLE:=Generalized Wireless Information utility(support mtk)
   DEPENDS:=+libiwinfo
   MAINTAINER:=Jo-Philipp Wich <xm@subsignal.org>
 endef
