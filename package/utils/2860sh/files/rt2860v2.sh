@@ -575,13 +575,21 @@ enable_rt2860v2() {
 	debug "enable_rt2860v2"
 	
 	#检查并创建WiFi驱动配置链接
-	[ -f /etc/Wireless/RT2860/RT2860.dat ] || {
-	mkdir -p /etc/Wireless/RT2860/ 2>/dev/null
-	ln -s /tmp/RT2860.dat /etc/Wireless/RT2860/RT2860.dat 2>/dev/null
-	}	
+	#[ -f /etc/Wireless/RT2860/RT2860.dat ] || {
+	#mkdir -p /etc/Wireless/RT2860/ 2>/dev/null
+	#ln -s /tmp/RT2860.dat /etc/Wireless/RT2860/RT2860.dat 2>/dev/null
+	#}
+
+        [ -f /etc/wireless/mt7628/mt7628.dat ] || {                             
+        mkdir -p /etc/wireless/mt7628/ 2>/dev/null                              
+        }                                                                       
+                                                                                
+        rm /etc/wireless/mt7628/mt7628.dat                                     
+        ln -s /tmp/RT2860.dat /etc/wireless/mt7628/mt7628.dat 2>/dev/null       
+           	
 	
 	#重置整个驱动
-	#reload_rt2860v2
+	reload_rt2860v2
 	debug "rt2860v2_ap_num=$rt2860v2_ap_num"
 	config_get_bool disabled "$device" disabled 0	
 	if [ "$disabled" = "1" ] ;then
