@@ -134,7 +134,6 @@
 				<&gdma 3>;
 			dma-names = "tx", "rx";
 
-			status = "disabled";
 		};
 
 		spi@b00 {
