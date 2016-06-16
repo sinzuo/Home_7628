@@ -20,17 +20,19 @@ setup_mt7628_port_mode() {
 	        vlan_id=$(uci get $switch_vlan.vlan)
 		
 		#if not set gid, skip
-		echo "vlan gid=$gid" | tee -a /tmp/switch.log	 
+		#echo "vlan gid=$gid" | tee -a /tmp/switch.log	 
 		#if [ -z $gid ]; then
 		#	i=$(($i+1))		
 		#	continue
 		#fi
-		
-		echo "vlan_id=$vlan_id" | tee -a /tmp/switch.log	 
+		 
 		if [ -z $vlan_id ]; then
 			i=$(($i+1))
 			continue
 		fi
+		
+		echo "vlan gid=$gid" | tee -a /tmp/switch.log
+		echo "vlan_id=$vlan_id" | tee -a /tmp/switch.log	
 		
 		#get ports, eg. "0 1 2 6t"
 		ports=$(uci get $switch_vlan.ports)
