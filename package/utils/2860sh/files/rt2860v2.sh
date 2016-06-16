@@ -86,6 +86,8 @@ rt2860v2_prepare_config() {
 
 	debug "rt2860v2_prepare_config"
 	
+	#config_get 变量名 Section名 Section参数名
+	
 	#获取参数 存储配置的变量 目标配置关键字
 	local ssid_num=0 apcli_num=0 mode disabled
 	local maxra0=0 maxra1=0	
@@ -440,7 +442,7 @@ HT_GI=1
 HT_STBC=1
 HT_LDPC=0
 HT_MCS=33
-VHT_BW=1
+VHT_BW=0
 VHT_SGI=1
 VHT_STBC=0
 VHT_BW_SIGNAL=0
