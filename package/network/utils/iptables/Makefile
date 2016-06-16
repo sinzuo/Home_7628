@@ -111,6 +111,7 @@ Extra iptables extensions for connection tracking.
 
  Targets:
   - CONNMARK
+  - IMQ		
 
 endef
 
@@ -124,6 +125,7 @@ iptables extensions for packet content inspection.
 Includes support for:
 
  Matches:
+  - layer7	
   - string
 
 endef
@@ -144,12 +146,14 @@ iptables extensions for matching/changing IP packet options.
   - tcpmss
   - unclean
   - hl
+  - imq
 
  Targets:
   - DSCP
   - CLASSIFY
   - ECN
   - HL
+  - IMQ
 
 endef
 
@@ -193,6 +197,15 @@ iptables extensions for user-space packet logging.
   - ULOG
 
 endef
+
+define Package/iptables-mod-imq/description
+iptables extensions for imq packet logging.
+
+ Targets:
+  - IMQ
+
+endef
+
 
 define Package/iptables-mod-nflog
 $(call Package/iptables/Module, +kmod-nfnetlink-log +kmod-ipt-nflog)
@@ -515,6 +528,7 @@ define BuildPlugin
 			$(CP) $(PKG_INSTALL_DIR)/usr/lib/iptables/lib$$$$$$$${m}.so $$(1)/usr/lib/iptables/ ; \
 		fi; \
 	done
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/iptables/libxt_IMQ.so $$(1)/usr/lib/iptables/
 	$(3)
   endef
 
