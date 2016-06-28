@@ -1,8 +1,8 @@
 Index: linux-3.18.23/drivers/net/Kconfig
 ===================================================================
---- linux-3.18.23.orig/drivers/net/Kconfig	2016-06-05 22:49:08.915773209 +0800
-+++ linux-3.18.23/drivers/net/Kconfig	2016-06-05 22:52:48.215764233 +0800
-@@ -360,4 +360,6 @@
+--- linux-3.18.23.orig/drivers/net/Kconfig
++++ linux-3.18.23/drivers/net/Kconfig
+@@ -360,4 +360,6 @@ config VMXNET3
  
  source "drivers/net/hyperv/Kconfig"
  
@@ -11,13 +11,14 @@ Index: linux-3.18.23/drivers/net/Kconfig
  endif # NETDEVICES
 Index: linux-3.18.23/drivers/net/Makefile
 ===================================================================
---- linux-3.18.23.orig/drivers/net/Makefile	2016-06-05 22:49:20.579772731 +0800
-+++ linux-3.18.23/drivers/net/Makefile	2016-06-05 22:53:16.623763070 +0800
-@@ -61,6 +61,7 @@
+--- linux-3.18.23.orig/drivers/net/Makefile
++++ linux-3.18.23/drivers/net/Makefile
+@@ -61,6 +61,8 @@ obj-$(CONFIG_VMXNET3) += vmxnet3/
  obj-$(CONFIG_XEN_NETDEV_FRONTEND) += xen-netfront.o
  obj-$(CONFIG_XEN_NETDEV_BACKEND) += xen-netback/
  
 +obj-$(CONFIG_RALINK_RDM) += rt_rdm/
- 
++
  obj-$(CONFIG_USB_NET_DRIVERS) += usb/
  
+ obj-$(CONFIG_HYPERV_NET) += hyperv/
