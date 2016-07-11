@@ -53,9 +53,13 @@ EOF
 	lan) uci -q batch <<EOF
 set network.$1.type='bridge'
 set network.$1.proto='static'
-set network.$1.ipaddr='192.168.1.1'
+set network.$1.ipaddr='192.168.1.220'
 set network.$1.netmask='255.255.255.0'
 set network.$1.ip6assign='60'
+#set network.lan10='interface'
+#set network.lan10.ifname='$ifname'
+#set network.lan10.proto='static'
+#set network.lan10.ipaddr='10.1.8.1'
 EOF
 		;;
 	wan) uci -q batch <<EOF
