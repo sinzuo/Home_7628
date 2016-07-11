@@ -57,4 +57,32 @@
 			};
 		};
 	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+		wifisignal1 {
+			label = "ap:green:signal1";
+			gpios = <&gpio0 4 0>;
+		};
+		wifisignal2 {
+			label = "ap:green:signal2";
+			gpios = <&gpio0 5 0>;
+		};
+		wifisignal3 {
+			label = "ap:green:signal3";
+			gpios = <&gpio0 3 0>;
+		};
+		wifisignal4 {
+			label = "ap:green:signal4";
+			gpios = <&gpio0 2 0>;
+		};
+		wifirun {
+			label = "ap:green:run";
+			gpios = <&gpio1 5 0>;
+		};
+		sim {
+			label = "ap:green:sim";
+			gpios = <&gpio1 12 1>;
+		};
+	};
 };
