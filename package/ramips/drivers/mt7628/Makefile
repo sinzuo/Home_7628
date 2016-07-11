@@ -7,7 +7,8 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
 PKG_NAME:=mt7628
-P4REV:=120395
+#P4REV:=120395
+P4REV:=20160310
 PKG_VERSION:=p4rev-$(P4REV)
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=http://localhost/
