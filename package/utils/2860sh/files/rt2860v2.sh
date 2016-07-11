@@ -252,8 +252,8 @@ done
 	cat > /tmp/RT2860.dat<<EOF
 #The word of "Default" must not be removed
 Default
-CountryRegion=${countryregion:-0}
-CountryRegionABand=7
+CountryRegion=${countryregion:-1}
+CountryRegionABand=0
 CountryCode=${country:-US}
 BssidNum=${ssid_num:-1}
 SSID1=${ssid1:-RW2458_SSID1}
@@ -284,7 +284,7 @@ PktAggregate=1
 AutoProvisionEn=0
 FreqDelta=0
 TurboRate=0
-WmmCapable=${wmm:-0}
+WmmCapable=1
 APAifsn=3;7;1;1
 APCwmin=4;4;3;2
 APCwmax=6;10;4;3
@@ -296,7 +296,7 @@ BSSCwmax=10;10;4;3
 BSSTxop=0;0;94;47
 BSSACM=0;0;0;0
 AckPolicy=0;0;0;0
-APSDCapable=0
+APSDCapable=1
 DLSCapable=0
 NoForwarding=0
 NoForwardingBTNBSSID=0
@@ -304,7 +304,7 @@ HideSSID=${hidessid:-0}
 ShortSlot=1
 AutoChannelSelect=${AutoChannelSelect:-0}
 IEEE8021X=0
-IEEE80211H=0
+IEEE80211H=1
 CarrierDetect=0
 ITxBfEn=0
 PreAntSwitch=
@@ -314,14 +314,23 @@ ETxBfEnCond=0
 ITxBfTimeout=0
 ETxBfTimeout=0
 ETxBfNoncompress=0
-ETxBfIncapable=0
+ETxBfIncapable=1
 FineAGC=0
 StreamMode=0
 StreamModeMac0=
 StreamModeMac1=
 StreamModeMac2=
 StreamModeMac3=
-CSPeriod=6
+CSPeriod=10
+WirelessEvent=0
+IdsEnable=0
+AuthFloodThreshold=32
+AssocReqFloodThreshold=32
+ReassocReqFloodThreshold=32
+ProbeReqFloodThreshold=32
+DisassocFloodThreshold=32
+DeauthFloodThreshold=32
+EapReqFooldThreshold=32
 RDRegion=
 StationKeepAlive=0
 DfsLowerLimit=0
@@ -427,7 +436,7 @@ Key4Str6=
 Key4Str7=
 Key4Str8=
 HSCounter=0
-HT_HTC=1
+HT_HTC=0
 HT_RDG=1
 HT_LinkAdapt=0
 HT_OpMode=0
@@ -436,7 +445,7 @@ HT_EXTCHA=${EXTCHA}
 HT_BW=${HT:-0}
 HT_AutoBA=1
 HT_BADecline=0
-HT_AMSDU=0
+HT_AMSDU=1
 HT_BAWinSize=64
 HT_GI=1
 HT_STBC=1
@@ -447,7 +456,7 @@ VHT_SGI=1
 VHT_STBC=0
 VHT_BW_SIGNAL=0
 VHT_DisallowNonVHT=0
-VHT_LDPC=0
+VHT_LDPC=1
 HT_TxStream=2
 HT_RxStream=2
 HT_PROTECT=1
@@ -913,6 +922,8 @@ detect_rt2860v2() {
 	pre_wpa2_key=$(hexdump -n 8 /dev/urandom |awk '{print $2$3$4$5;}')
 #	rt2860v2_mac=$(rt2860v2_get_mac Factory)	
 	
+	ssid=tozed-`ifconfig eth0 | grep HWaddr | cut -c 48- | sed 's/://g'`
+	
 		cat <<EOF
 config wifi-device  ra${i}
 	option type     rt2860v2
@@ -929,18 +940,18 @@ config wifi-iface
 	option device   ra${i}
 	option network	lan
 	option mode     ap
-	option ssid     fq
+	option ssid     $ssid
 	option encryption none
 #	option encryption psk2
 #	option key $pre_wpa2_key
 	
 
-config wifi-iface
-        option device   ra${i}
-        option network  wwan
-        option mode     ap
-        option ssid     andWiFi
-        option encryption none
+#config wifi-iface
+#        option device   ra${i}
+#        option network  wwan
+#        option mode     ap
+#        option ssid     andWiFi
+#        option encryption none
 #       option encryption psk2
 #       option key $pre_wpa2_key
 
