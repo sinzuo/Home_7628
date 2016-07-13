@@ -25,10 +25,14 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/ioctl.h>
-#include <linux/autoconf.h>
+#include <generated/autoconf.h>
 #include "ralink_gpio.h"
 
 #define GPIO_DEV	"/dev/gpio"
+
+#ifndef CONFIG_RALINK_MT7628  // add by zhengxq for cc
+#define CONFIG_RALINK_MT7628
+#endif
 
 enum {
 	gpio_in,

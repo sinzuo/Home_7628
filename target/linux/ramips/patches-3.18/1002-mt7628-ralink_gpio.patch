@@ -1,0 +1,30 @@
+Index: linux-3.18.23/drivers/char/Kconfig
+===================================================================
+--- linux-3.18.23.orig/drivers/char/Kconfig
++++ linux-3.18.23/drivers/char/Kconfig
+@@ -4,6 +4,15 @@
+ 
+ menu "Character devices"
+ 
++config RALINK_GPIO
++	bool "Ralink GPIO Support"
++	default y
++
++config RALINK_GPIO_LED
++	bool "Ralink GPIO LED Support"
++	depends on RALINK_GPIO
++	default y
++	
+ source "drivers/tty/Kconfig"
+ 
+ config DEVKMEM
+Index: linux-3.18.23/drivers/char/Makefile
+===================================================================
+--- linux-3.18.23.orig/drivers/char/Makefile
++++ linux-3.18.23/drivers/char/Makefile
+@@ -62,3 +62,5 @@ js-rtc-y = rtc.o
+ 
+ obj-$(CONFIG_TILE_SROM)		+= tile-srom.o
+ obj-$(CONFIG_XILLYBUS)		+= xillybus/
++
++obj-$(CONFIG_RALINK_GPIO)	+= ralink_gpio.o
