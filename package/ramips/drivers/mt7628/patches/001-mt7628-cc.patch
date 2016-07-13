@@ -1,7 +1,7 @@
-Index: mt7628-p4rev-120395/build/Makefile
+Index: mt7628-p4rev-20160310/build/Makefile
 ===================================================================
---- mt7628-p4rev-120395.orig/build/Makefile
-+++ mt7628-p4rev-120395/build/Makefile
+--- mt7628-p4rev-20160310.orig/build/Makefile
++++ mt7628-p4rev-20160310/build/Makefile
 @@ -6,7 +6,8 @@ ifeq ($(CONFIG_SUPPORT_OPENWRT),y)
  EXTRA_CFLAGS = -I$(src)/../src/include \
  				-I$(src)/../src/embedded/include \
@@ -30,10 +30,10 @@ Index: mt7628-p4rev-120395/build/Makefile
  
  
  #
-Index: mt7628-p4rev-120395/src/embedded/include/iface/rtmp_rbs.h
+Index: mt7628-p4rev-20160310/src/embedded/include/iface/rtmp_rbs.h
 ===================================================================
---- mt7628-p4rev-120395.orig/src/embedded/include/iface/rtmp_rbs.h
-+++ mt7628-p4rev-120395/src/embedded/include/iface/rtmp_rbs.h
+--- mt7628-p4rev-20160310.orig/src/embedded/include/iface/rtmp_rbs.h
++++ mt7628-p4rev-20160310/src/embedded/include/iface/rtmp_rbs.h
 @@ -35,7 +35,7 @@
    *
    ************************************************************************/
@@ -43,10 +43,10 @@ Index: mt7628-p4rev-120395/src/embedded/include/iface/rtmp_rbs.h
  
  
  /*************************************************************************
-Index: mt7628-p4rev-120395/src/embedded/os/linux/rt_linux.c
+Index: mt7628-p4rev-20160310/src/embedded/os/linux/rt_linux.c
 ===================================================================
---- mt7628-p4rev-120395.orig/src/embedded/os/linux/rt_linux.c
-+++ mt7628-p4rev-120395/src/embedded/os/linux/rt_linux.c
+--- mt7628-p4rev-20160310.orig/src/embedded/os/linux/rt_linux.c
++++ mt7628-p4rev-20160310/src/embedded/os/linux/rt_linux.c
 @@ -330,7 +330,7 @@ void RtmpFlashRead(
  #ifdef RA_MTD_RW_BY_NUM
  	ra_mtd_read(MTD_NUM_FACTORY, 0, (size_t) b, p);
