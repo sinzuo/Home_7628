@@ -14,7 +14,7 @@
 	pinctrl {
 		state_default: pinctrl0 {
 			gpio {
-				ralink,group = "i2c", "jtag";
+				ralink,group = "i2c", "i2s";
 				ralink,function = "gpio";
 			};
 		};
@@ -61,27 +61,27 @@
 	gpio-leds {
 		compatible = "gpio-leds";
 		wifisignal1 {
-			label = "ap:green:signal1";
-			gpios = <&gpio0 4 0>;
+			label = "signal1";
+			gpios = <&gpio0 4 1>;
 		};
 		wifisignal2 {
-			label = "ap:green:signal2";
-			gpios = <&gpio0 5 0>;
+			label = "signal2";
+			gpios = <&gpio0 5 1>;
 		};
 		wifisignal3 {
-			label = "ap:green:signal3";
-			gpios = <&gpio0 3 0>;
+			label = "signal3";
+			gpios = <&gpio0 3 1>;
 		};
 		wifisignal4 {
-			label = "ap:green:signal4";
-			gpios = <&gpio0 2 0>;
+			label = "signal4";
+			gpios = <&gpio0 2 1>;
 		};
 		wifirun {
-			label = "ap:green:run";
-			gpios = <&gpio1 5 0>;
+			label = "wifirun";
+			gpios = <&gpio1 5 1>;
 		};
 		sim {
-			label = "ap:green:sim";
+			label = "sim";
 			gpios = <&gpio1 12 1>;
 		};
 	};

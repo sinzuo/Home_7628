@@ -604,7 +604,10 @@ enable_rt2860v2() {
 	debug "rt2860v2_ap_num=$rt2860v2_ap_num"
 	config_get_bool disabled "$device" disabled 0	
 	if [ "$disabled" = "1" ] ;then
+	gpio l 37 0 4000 0 1 4000
 	return
+	else
+	gpio l 37 1 1 100 0 4000
 	fi
 	
 	#开始准备该设备的无线配置参数
