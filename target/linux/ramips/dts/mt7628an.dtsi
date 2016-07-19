@@ -309,6 +309,13 @@
 			};
 		};
 
+		ephy_pins: ephy {
+			ephy {
+				ralink,group = "ephy";
+				ralink,function = "ephy";
+			};
+		};
+
 		pwm0_pins: pwm0 {
 			pwm0 {
 				ralink,group = "pwm0";
