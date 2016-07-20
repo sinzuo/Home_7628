@@ -377,7 +377,8 @@ local function wifi_reconnect_shutdown(shutdown, wnet)
 		net:set("disabled", shutdown and 1 or nil)
 		netmd:commit("wireless")
 
-		luci.sys.call("env -i /bin/ubus call network reload >/dev/null 2>/dev/null")
+		os.execute("/sbin/wifi reload_legacy")
+		--luci.sys.call("env -i /bin/ubus call network reload >/dev/null 2>/dev/null")
 		luci.http.status(200, shutdown and "Shutdown" or "Reconnected")
 
 		return
