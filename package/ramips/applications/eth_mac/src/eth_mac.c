@@ -8,15 +8,16 @@
 #include <stdint.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
-#include <linux/autoconf.h>  //kernel config
+#include <generated/autoconf.h>
 
-#define MTD_FACTORY     "/dev/mtd3"
+#define MTD_FACTORY     "/dev/mtd2"
 #if defined (CONFIG_RALINK_RT6855A) || defined (CONFIG_RALINK_MT7621)
 #define LAN_OFFSET    0xE000
 #define WAN_OFFSET    0xE006
 #else
 #define LAN_OFFSET    0x28
 #define WAN_OFFSET    0x2E
+#define WLAN_OFFSET   0x04
 #endif
 
 #define MACADDR_LEN     6
@@ -56,7 +57,9 @@ int mtd_read(char *side)
         return -1;
     }
 
-    if (!strcmp(side, "wan"))
+    if (!strcmp(side, "wlan"))
+        lseek(fd, WLAN_OFFSET, SEEK_SET);
+    else if (!strcmp(side, "wan"))
         lseek(fd, WAN_OFFSET, SEEK_SET);
     else
         lseek(fd, LAN_OFFSET, SEEK_SET);
@@ -119,7 +122,9 @@ int mtd_write(char *side, char **value)
             goto write_fail;
         }
     }
-    if (!strcmp(side, "wan"))
+    if (!strcmp(side, "wlan"))
+        ptr = buf + WLAN_OFFSET;
+    else if (!strcmp(side, "wan"))
         ptr = buf + WAN_OFFSET;
     else
         ptr = buf + LAN_OFFSET;
@@ -167,6 +172,15 @@ int main(int argc,char **argv)
                 goto CmdFail;
             if (mtd_write(argv[2], argv+3) < 0)
                 goto Fail;
+            if (!strcmp(argv[2], "wlan"))
+            {
+                unsigned char value = 0 ;
+                strcpy(argv[2], "lan");
+                value = strtoul(argv[6], NULL, 16);
+                sprintf(argv[6], "%02x", (unsigned char)(value+2));
+                if (mtd_write(argv[2], argv+3) < 0)
+                    goto Fail;
+            }
             break;
         default:
             goto CmdFail;
