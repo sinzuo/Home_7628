@@ -149,8 +149,8 @@ write_fail:
 void usage(char **str)
 {
     printf("How to use:\n");
-    printf("\tread:   %s r <lan|wan>\n", str[0]);
-    printf("\twrite:  %s w <lan|wan> <MACADDR[0]> <MACADDR[1]> ...\n", str[0]);
+    printf("\tread:   %s r <wlan|lan|wan>\n", str[0]);
+    printf("\twrite:  %s w <wlan|lan|wan> <MACADDR[0]> <MACADDR[1]> ...\n", str[0]);
 }
 
 int main(int argc,char **argv)
