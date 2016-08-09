@@ -1,5 +1,21 @@
--- Copyright 2009-2015 Jo-Philipp Wich <jow@openwrt.org>
--- Licensed to the public under the Apache License 2.0.
+--[[
+LuCI - Network model
+
+Copyright 2009-2010 Jo-Philipp Wich <xm@subsignal.org>
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+]]--
 
 local type, next, pairs, ipairs, loadfile, table
 	= type, next, pairs, ipairs, loadfile, table
@@ -8,6 +24,7 @@ local tonumber, tostring, math = tonumber, tostring, math
 
 local require = require
 
+local bus = require "ubus"
 local nxo = require "nixio"
 local nfs = require "nixio.fs"
 local ipc = require "luci.ip"
@@ -22,7 +39,7 @@ module "luci.model.network"
 
 IFACE_PATTERNS_VIRTUAL  = { }
 IFACE_PATTERNS_IGNORE   = { "^wmaster%d", "^wifi%d", "^hwsim%d", "^imq%d", "^ifb%d", "^mon%.wlan%d", "^sit%d", "^gre%d", "^lo$" }
-IFACE_PATTERNS_WIRELESS = { "^wlan%d", "^wl%d", "^ath%d", "^%w+%.network%d" }
+IFACE_PATTERNS_WIRELESS = { "^wlan%d", "^wl%d", "^ath%d", "^%w+%.network%d", "^ra%d", "^rai%d" }
 
 
 protocol = utl.class()
@@ -30,7 +47,7 @@ protocol = utl.class()
 local _protocols = { }
 
 local _interfaces, _bridge, _switch, _tunnel
-local _ubusnetcache, _ubusdevcache, _ubuswificache
+local _ubus, _ubusnetcache, _ubusdevcache, _ubuswificache
 local _uci_real, _uci_state
 
 function _filter(c, s, o, r)
@@ -118,25 +135,13 @@ function _wifi_iface(x)
 end
 
 function _wifi_state(key, val, field)
-	local radio, radiostate, ifc, ifcstate
-
 	if not next(_ubuswificache) then
-		_ubuswificache = utl.ubus("network.wireless", "status", {}) or {}
-
-		-- workaround extended section format
-		for radio, radiostate in pairs(_ubuswificache) do
-			for ifc, ifcstate in pairs(radiostate.interfaces) do
-				if ifcstate.section and ifcstate.section:sub(1, 1) == '@' then
-					local s = _uci_real:get_all('wireless.%s' % ifcstate.section)
-					if s then
-						ifcstate.section = s['.name']
-					end
-				end
-			end
-		end
+		_ubuswificache = _ubus:call("network.wireless", "status", {}) or {}
 	end
 
+	local radio, radiostate
 	for radio, radiostate in pairs(_ubuswificache) do
+		local ifc, ifcstate
 		for ifc, ifcstate in pairs(radiostate.interfaces) do
 			if ifcstate[key] == val then
 				return ifcstate[field]
@@ -213,6 +218,7 @@ function init(cursor)
 	_switch     = { }
 	_tunnel     = { }
 
+	_ubus          = bus.connect()
 	_ubusnetcache  = { }
 	_ubusdevcache  = { }
 	_ubuswificache = { }
@@ -619,10 +625,10 @@ end
 
 function get_status_by_route(self, addr, mask)
 	local _, object
-	for _, object in ipairs(utl.ubus()) do
+	for _, object in ipairs(_ubus:objects()) do
 		local net = object:match("^network%.interface%.(.+)")
 		if net then
-			local s = utl.ubus(object, "status", {})
+			local s = _ubus:call(object, "status", {})
 			if s and s.route then
 				local rt
 				for _, rt in ipairs(s.route) do
@@ -637,10 +643,10 @@ end
 
 function get_status_by_address(self, addr)
 	local _, object
-	for _, object in ipairs(utl.ubus()) do
+	for _, object in ipairs(_ubus:objects()) do
 		local net = object:match("^network%.interface%.(.+)")
 		if net then
-			local s = utl.ubus(object, "status", {})
+			local s = _ubus:call(object, "status", {})
 			if s and s['ipv4-address'] then
 				local a
 				for _, a in ipairs(s['ipv4-address']) do
@@ -704,8 +710,8 @@ end
 
 function protocol._ubus(self, field)
 	if not _ubusnetcache[self.sid] then
-		_ubusnetcache[self.sid] = utl.ubus("network.interface.%s" % self.sid,
-		                                   "status", { })
+		_ubusnetcache[self.sid] = _ubus:call("network.interface.%s" % self.sid,
+		                                     "status", { })
 	end
 	if _ubusnetcache[self.sid] and field then
 		return _ubusnetcache[self.sid][field]
@@ -1052,8 +1058,8 @@ end
 
 function interface._ubus(self, field)
 	if not _ubusdevcache[self.ifname] then
-		_ubusdevcache[self.ifname] = utl.ubus("network.device", "status",
-		                                      { name = self.ifname })
+		_ubusdevcache[self.ifname] = _ubus:call("network.device", "status",
+		                                        { name = self.ifname })
 	end
 	if _ubusdevcache[self.ifname] and field then
 		return _ubusdevcache[self.ifname][field]
@@ -1268,7 +1274,6 @@ function wifidev.get_i18n(self)
 	if l.b then m = m .. "b" end
 	if l.g then m = m .. "g" end
 	if l.n then m = m .. "n" end
-	if l.ac then m = "ac" end
 
 	return "%s 802.11%s Wireless Controller (%s)" %{ t, m, self:name() }
 end
@@ -1421,7 +1426,7 @@ function wifinet.is_up(self)
 end
 
 function wifinet.active_mode(self)
-	local m = _stror(self.iwdata.mode, self.iwinfo.mode) or "ap"
+	local m = _stror(self.iwinfo.mode, self.iwdata.mode) or "ap"
 
 	if     m == "ap"      then m = "Master"
 	elseif m == "sta"     then m = "Client"
@@ -1438,11 +1443,11 @@ function wifinet.active_mode_i18n(self)
 end
 
 function wifinet.active_ssid(self)
-	return _stror(self.iwdata.ssid, self.iwinfo.ssid)
+	return _stror(self.iwinfo.ssid, self.iwdata.ssid)
 end
 
 function wifinet.active_bssid(self)
-	return _stror(self.iwdata.bssid, self.iwinfo.bssid) or "00:00:00:00:00:00"
+	return _stror(self.iwinfo.bssid, self.iwdata.bssid) or "00:00:00:00:00:00"
 end
 
 function wifinet.active_encryption(self)
