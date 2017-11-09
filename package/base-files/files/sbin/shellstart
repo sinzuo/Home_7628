@@ -1,0 +1,14 @@
+#!/bin/sh
+
+
+
+
+
+#to ensure the ubus is working well  
+/sbin/2060 &
+
+/usr/bin/lua /sbin/testubus.lua &
+
+
+test -f /sbin/shengji && /sbin/shengji &
+
