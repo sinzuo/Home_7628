@@ -94,7 +94,28 @@
  
 --- a/drivers/net/ethernet/ralink/esw_rt3052.c
 +++ b/drivers/net/ethernet/ralink/esw_rt3052.c
-@@ -611,7 +611,7 @@ static void esw_hw_init(struct rt305x_es
+@@ -41,6 +41,12 @@
+ 
+ #include <asm/mach-ralink/rt305x_esw_platform.h>
+ 
++
++#define PHYS_TO_K1(physaddr) KSEG1ADDR(physaddr)
++#define sysRegRead(phys) (*(volatile unsigned int *)PHYS_TO_K1(phys))
++#define sysRegWrite(phys, val)  ((*(volatile unsigned int *)PHYS_TO_K1(phys)) = (val))
++
++
+ /*
+  * HW limitations for this switch:
+  * - No large frame support (PKT_MAX_LEN at most 1536)
+@@ -448,6 +454,7 @@ static void esw_hw_init(struct rt305x_esw *esw)
+ 	int i;
+ 	u8 port_disable = 0;
+ 	u8 port_map = RT305X_ESW_PMAP_LLLLLL;
++	u32 val=0;
+ 
+ 	/* vodoo from original driver */
+ 	esw_w32(esw, 0xC8A07850, RT305X_ESW_REG_FCT0);
+@@ -611,7 +618,7 @@ static void esw_hw_init(struct rt305x_esw *esw)
  		rt305x_mii_write(esw, 0, 29, 0x598b);
  		/* select local register */
  		rt305x_mii_write(esw, 0, 31, 0x8000);
@@ -103,7 +124,24 @@
  		int i;
  //		u32 phy_val;
  		u32 val;
-@@ -1042,7 +1042,7 @@ esw_get_port_tr_badgood(struct switch_de
+@@ -708,7 +715,15 @@ static void esw_hw_init(struct rt305x_esw *esw)
+ 	/* make the switch leds blink */
+ 	for (i = 0; i < RT305X_ESW_NUM_LEDS; i++)
+ 		esw->ports[i].led = 0x05;
+-
++		
++		
++		val = sysRegRead(0xB0000000 + 0x64);
++		val &= 0xf003f003;
++	sysRegWrite(0xB0000000 + 0x64, val); 
++
++	//val=rt_sysc_r32(0x10000064);
++//	val &= 0xf003f003;
++	//rt_sysc_w32(val,0x10000064);
+ 	/* Apply the empty config. */
+ 	esw_apply_config(&esw->swdev);
+ 
+@@ -1042,7 +1057,7 @@ esw_get_port_tr_badgood(struct switch_dev *dev,
  	int shift = attr->id == RT5350_ESW_ATTR_PORT_TR_GOOD ? 0 : 16;
  	u32 reg;
  
@@ -112,3 +150,4 @@
  		return -EINVAL;
  
  	if (idx < 0 || idx >= RT305X_ESW_NUM_LANWAN)
+
