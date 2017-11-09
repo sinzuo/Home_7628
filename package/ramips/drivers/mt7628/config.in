@@ -25,17 +25,8 @@ config MT7628_RT_FIRST_CARD_EEPROM
 		default "flash"
 
 
-config MT7628_SECOND_IF_EEPROM_FLASH
-	bool
-	default y
 
-config MT7628_RT_SECOND_CARD_EEPROM
-		string
-		default "flash"
-		
-config MT7628_MULTI_INF_SUPPORT
-		bool
-		default n
+
 
 config MT7628_WIFI_BASIC_FUNC
 	bool "Basic Functions"
@@ -133,7 +124,7 @@ config MT7628_UAPSD
 # Section for chip architectures
 #
 config MT7628_MT_MAC
-	bool
+	bool "MT_MAC"
 	default y
 
 #
@@ -175,6 +166,7 @@ config MT7628_MBSS_SUPPORT
 config MT7628_NEW_MBSSID_MODE
 	bool "New MBSSID MODE"
 	depends on MT7628_MT_AP_SUPPORT && MT7628_MBSS_SUPPORT
+	depends on RALINK_RT3883 || RALINK_RT3352 || RALINK_RT5350 || RALINK_RT6352 || RALINK_MT7620 || MT7628_MBSS_SUPPORT || MT7628_MT_AP_SUPPORT 
 	default y
 
 config MT7628_ENHANCE_NEW_MBSSID_MODE
