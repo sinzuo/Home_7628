@@ -1,0 +1,7 @@
+#!/bin/sh
+
+mac=$(dd bs=1 skip=4 count=6 if=/dev/mtdblock2 2>/dev/null | maccalc bin2mac)
+
+echo $mac
+
+
