@@ -1047,6 +1047,9 @@ end
  --       io.popen("/sbin/authwifi")
 --end
 
-
+local apply=luci.http.formvalue("cbi.apply")
+if apply then
+        io.popen("/sbin/setbri")
+end
 
 return m

@@ -78,7 +78,7 @@ newnet = m:field(Value, "_netname_new", translate("Name of the new network"),
 		"<code>0-9</code> and <code>_</code>"
 	))
 
-newnet.default = m.hidden.mode == "Ad-Hoc" and "mesh" or "wwan"
+newnet.default = m.hidden.mode == "Ad-Hoc" and "mesh" or "bridge"
 newnet.datatype = "uciname"
 
 if has_firewall then
@@ -87,7 +87,7 @@ if has_firewall then
 		translate("Choose the firewall zone you want to assign to this interface. Select <em>unspecified</em> to remove the interface from the associated zone or fill out the <em>create</em> field to define a new zone and attach the interface to it."))
 
 	fwzone.template = "cbi/firewall_zonelist"
-	fwzone.default = m.hidden.mode == "Ad-Hoc" and "mesh" or "wan"
+	fwzone.default = m.hidden.mode == "Ad-Hoc" and "mesh" or "lan"
 end
 
 function newnet.parse(self, section)
@@ -109,14 +109,14 @@ function newnet.parse(self, section)
 
 	wdev:set("disabled", false)
 	wdev:set("channel", m.hidden.channel)
-
+--[[
 	if replace:formvalue(section) then
 		local n
 		for _, n in ipairs(wdev:get_wifinets()) do
 			wdev:del_wifinet(n)
 		end
 	end
-
+]]--
 	local wconf = {
 		device  = m.hidden.device,
 		ssid    = m.hidden.join,
