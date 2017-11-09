@@ -4,7 +4,7 @@
 
 / {
 	compatible = "mediatek,mt7628an-eval-board", "mediatek,mt7628an-soc";
-	model = "MT7628AN";
+	model = "MT7628-SC";
 
 	ethernet@10100000 {
 		pinctrl-names = "default";
@@ -15,7 +15,7 @@
 
 	memory@0 {
 		device_type = "memory";
-		reg = <0x0 0x2000000>;
+		reg = <0x0 0x4000000>;
 	};
 
 	pinctrl {
@@ -43,7 +43,7 @@
 				partition@0 {
 					label = "u-boot";
 					reg = <0x0 0x30000>;
-					read-only;
+					
 				};
 
 				partition@30000 {
@@ -94,12 +94,12 @@
 			label = "signal4";
 			gpios = <&gpio0 2 1>;
 		};
-		wifirun {
-			label = "wifirun";
+		wps {
+			label = "wps";
 			gpios = <&gpio1 5 1>;
 		};
-		sim {
-			label = "sim";
+		wifi {
+			label = "wifi";
 			gpios = <&gpio1 12 1>;
 		};
 	};

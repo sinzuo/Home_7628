@@ -4,7 +4,7 @@
 
 / {
 	compatible = "mediatek,mt7628an-eval-board", "mediatek,mt7628an-soc";
-	model = "MT7628AN";
+	model = "IJLY_420";
 
 	ethernet@10100000 {
 		pinctrl-names = "default";
@@ -15,7 +15,7 @@
 
 	memory@0 {
 		device_type = "memory";
-		reg = <0x0 0x2000000>;
+		reg = <0x0 0x8000000>;
 	};
 
 	pinctrl {
@@ -43,7 +43,6 @@
 				partition@0 {
 					label = "u-boot";
 					reg = <0x0 0x30000>;
-					read-only;
 				};
 
 				partition@30000 {
@@ -59,7 +58,7 @@
 
 				partition@50000 {
 					label = "firmware";
-					reg = <0x50000 0x7b0000>;
+					reg = <0x50000 0xfb0000>;
 				};
 			};
 		};
@@ -78,28 +77,12 @@
 
 	gpio-leds {
 		compatible = "gpio-leds";
-		wifisignal1 {
-			label = "signal1";
-			gpios = <&gpio0 4 1>;
-		};
-		wifisignal2 {
-			label = "signal2";
-			gpios = <&gpio0 5 1>;
-		};
-		wifisignal3 {
-			label = "signal3";
-			gpios = <&gpio0 3 1>;
-		};
-		wifisignal4 {
-			label = "signal4";
-			gpios = <&gpio0 2 1>;
-		};
-		wifirun {
-			label = "wifirun";
+		power {
+			label = "power";
 			gpios = <&gpio1 5 1>;
 		};
-		sim {
-			label = "sim";
+		wifi {
+			label = "wifi";
 			gpios = <&gpio1 12 1>;
 		};
 	};

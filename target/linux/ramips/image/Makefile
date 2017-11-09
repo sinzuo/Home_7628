@@ -998,11 +998,17 @@ endif
 
 Image/Build/Profile/MT7688=$(call BuildFirmware/Default16M/$(1),$(1),mt7628,MT7628)
 Image/Build/Profile/LinkIt7688=$(call BuildFirmware/Default32M/$(1),$(1),LinkIt7688,LINKIT7688)
+Image/Build/Profile/FJ=$(call BuildFirmware/Default8M/$(1),$(1),fj,FJ)
+Image/Build/Profile/SC=$(call BuildFirmware/Default8M/$(1),$(1),sc,SC)
+Image/Build/Profile/BL=$(call BuildFirmware/Default16M/$(1),$(1),bl,BL)
 
 ifeq ($(SUBTARGET),mt7628)
 define Image/Build/Profile/Default
 	$(call Image/Build/Profile/MT7688,$(1))
 	$(call Image/Build/Profile/LinkIt7688,$(1))
+	$(call Image/Build/Profile/FJ,$(1))
+	$(call Image/Build/Profile/SC,$(1))
+	$(call Image/Build/Profile/BL,$(1))
 endef
 endif
 
