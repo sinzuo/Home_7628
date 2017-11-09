@@ -1,0 +1,11 @@
+#!/bin/sh
+
+jffs2reset -y
+
+echo "pass"
+
+
+
+
+
+

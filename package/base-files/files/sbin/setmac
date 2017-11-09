@@ -1,0 +1,20 @@
+#!/bin/sh
+
+. /lib/functions.sh
+. /lib/ramips.sh
+. /lib/functions/uci-defaults-new.sh
+. /lib/functions/system.sh
+
+
+
+                lan_mac=$(cat /sys/class/net/eth0/address)
+                #lan_mac=$(macaddr_setbit_la "$lan_mac")        
+                
+
+		wan_mac=$(macaddr_add "$lan_mac" 0x10000)	
+
+		echo $wan_mac
+	uci set network.wan.macaddr=$wan_mac
+
+	uci commit
+	sleep 1
