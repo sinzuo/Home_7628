@@ -586,14 +586,14 @@ enable_rt2860v2() {
 	debug "enable_rt2860v2"
 	
 	#检查并创建WiFi驱动配置链接
-	#[ -f /etc/Wireless/RT2860/RT2860.dat ] || {
-	#mkdir -p /etc/Wireless/RT2860/ 2>/dev/null
-	#ln -s /tmp/RT2860.dat /etc/Wireless/RT2860/RT2860.dat 2>/dev/null
-	#}
+	[ -f /etc/Wireless/RT2860/RT2860.dat ] || {
+	mkdir -p /etc/Wireless/RT2860/ 2>/dev/null
+	ln -s /tmp/RT2860.dat /etc/Wireless/RT2860/RT2860.dat 2>/dev/null
+	}
 
-        [ -f /etc/wireless/mt7628/mt7628.dat ] || {                             
-        mkdir -p /etc/wireless/mt7628/ 2>/dev/null                              
-        }                                                                       
+        #[ -f /etc/wireless/mt7628/mt7628.dat ] || {                             
+        #mkdir -p /etc/wireless/mt7628/ 2>/dev/null                              
+        #}                                                                       
                                                                                 
         rm /etc/wireless/mt7628/mt7628.dat                                     
         ln -s /tmp/RT2860.dat /etc/wireless/mt7628/mt7628.dat 2>/dev/null       
@@ -604,10 +604,7 @@ enable_rt2860v2() {
 	debug "rt2860v2_ap_num=$rt2860v2_ap_num"
 	config_get_bool disabled "$device" disabled 0	
 	if [ "$disabled" = "1" ] ;then
-	gpio l 37 0 4000 0 1 4000
 	return
-	else
-	gpio l 37 1 1 100 0 4000
 	fi
 	
 	#开始准备该设备的无线配置参数
@@ -821,7 +818,14 @@ enable_rt2860v2() {
 		else
 		 iwpriv $ifname set RadioOn=1
 		fi
-		
+	
+		if [ $hidessid ==  1 ];then                                     
+                iwpriv $ifname set HideSSID=1                                   
+                #echo $ifname                                                   
+                else                                                            
+                iwpriv $ifname set HideSSID=0                                   
+                fi 
+	
 		#隔离客户端连接。
 		[ $isolate == "1" ]&&{
 			iwpriv $ifname set NoForwarding=1
@@ -846,17 +850,28 @@ enable_rt2860v2() {
 		}
 		else
 		{
+			count=0
 			local net_cfg bridge
 			net_cfg="$(find_net_config "$vif")"
 			[ -z "$net_cfg" ]||{
+				
 				bridge="$(bridge_interface "$net_cfg")"
+				while [ $count -lt 3 ]
+				do
+					[ -z "$bridge" ] || break
+					count=$(($count+1))
+					echo "count="$count
+					sleep 1
+				done		
+				if [ $count -lt 3 ];then
+			
 				config_set "$vif" bridge "$bridge"
 				rt2860v2_start_vif "$vif" "$ifname"
 				#Fix bridge problem
 				[ -z `brctl show |grep $ifname` ] && {
 				brctl addif $(bridge_interface "$net_cfg") $ifname
 				}
-				
+				fi
 			}
 
 
@@ -871,13 +886,13 @@ enable_rt2860v2() {
 	#配置无线最大连接数
 	#iwpriv $device set MaxStaNum=100
     local tmprssi1=`/sbin/uci  get wireless.ra0.KickStaRssiLow 2> /dev/null`
-    local tmprssi2=`/sbin/uci  get wireless.ra0.AuthRssiThres 2> /dev/null`
+   # local tmprssi2=`/sbin/uci  get wireless.ra0.AuthRssiThres 2> /dev/null`
     local tmprssi3=`/sbin/uci  get wireless.ra0.AssocReqRssiThres 2> /dev/null`
     if [ -z "$tmprssi1" ]; then
          tmprssi1="100"                                                          
     fi                            
     echo $tmprssi1     
-#    iwpriv $device set KickStaRssiLow=-$tmprssi1	
+   iwpriv $device set KickStaRssiLow=-$tmprssi1	
     
     if [ -z "$tmprssi2" ]; then
          tmprssi2="100"                                                          
@@ -889,8 +904,9 @@ enable_rt2860v2() {
          tmprssi3="100"                                                          
     fi                            
     echo $tmprssi3     
-#    iwpriv $device set AssocReqRssiThres=-$tmprssi3
-    
+    iwpriv $device set AssocReqRssiThres=-$tmprssi3
+
+ 
 }
 
 #获取MAC地址
@@ -911,33 +927,40 @@ detect_rt2860v2() {
 		config_get type ra${i} type
 		[ "$type" = rt2860v2 ] && continue
 		
-#检查并创建WiFi驱动配置链接
-	[ -f /etc/wireless/mt7628/mt7628.dat ] || {
-	mkdir -p /etc/wireless/mt7628/ 2>/dev/null
-	}	
-	
-	rm /etc/wireless/mt7628/mt7628.dat 
-	ln -s /tmp/RT2860.dat /etc/wireless/mt7628/mt7628.dat 2>/dev/null
+
+
+
+        [ -f /etc/Wireless/RT2860/RT2860.dat ] || {
+        mkdir -p /etc/Wireless/RT2860/ 2>/dev/null
+        ln -s /tmp/RT2860.dat /etc/Wireless/RT2860/RT2860.dat 2>/dev/null
+        }
+
+
+
 
 	
 	
 	local pre_wpa2_key
 	pre_wpa2_key=$(hexdump -n 8 /dev/urandom |awk '{print $2$3$4$5;}')
-#	rt2860v2_mac=$(rt2860v2_get_mac Factory)	
+	rt2860v2_mac=$(rt2860v2_get_mac factory)	
 	
-	ssid=tozed-`ifconfig eth0 | grep HWaddr | cut -c 48- | sed 's/://g'`
+#	ssid=wireless-`ifconfig eth0 | grep HWaddr | cut -c 48- | sed 's/://g'`
+	ssid=wireless-`echo $rt2860v2_mac  | cut -c 9- |  sed 's/://g'`
+
 	
 		cat <<EOF
 config wifi-device  ra${i}
 	option type     rt2860v2
-	option mode 	9
+	option mode 	7
 	option channel  auto
 	option txpower 100
 	option ht 	20
-	option country US
+	option country CN
 	
 # REMOVE THIS LINE TO ENABLE WIFI:
 	option disabled 0	
+	option AssocReqRssiThres 88
+	option KickStaRssiLow	88
 	
 config wifi-iface
 	option device   ra${i}
@@ -945,6 +968,7 @@ config wifi-iface
 	option mode     ap
 	option ssid     $ssid
 	option encryption none
+#	option portal 1
 #	option encryption psk2
 #	option key $pre_wpa2_key
 	
