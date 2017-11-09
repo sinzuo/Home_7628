@@ -14,27 +14,8 @@ IWINFO_CLI_LDFLAGS = $(LDFLAGS) -L. -liwinfo
 IWINFO_CLI_OBJ     = iwinfo_cli.o
 
 
-ifneq ($(filter wl,$(IWINFO_BACKENDS)),)
-	IWINFO_CFLAGS  += -DUSE_WL
-	IWINFO_LIB_OBJ += iwinfo_wl.o
-endif
-
-ifneq ($(filter madwifi,$(IWINFO_BACKENDS)),)
-	IWINFO_CFLAGS  += -DUSE_MADWIFI
-	IWINFO_LIB_OBJ += iwinfo_madwifi.o
-endif
-
-ifneq ($(filter mtk,$(IWINFO_BACKENDS)),)
-	IWINFO_CFLAGS  += -DUSE_MTK
-	IWINFO_LIB_OBJ += iwinfo_mtk.o
-endif
-
-ifneq ($(filter nl80211,$(IWINFO_BACKENDS)),)
-	IWINFO_CFLAGS      += -DUSE_NL80211
-	IWINFO_CLI_LDFLAGS += -lnl-tiny
-	IWINFO_LIB_LDFLAGS += -lnl-tiny
-	IWINFO_LIB_OBJ     += iwinfo_nl80211.o
-endif
+IWINFO_CFLAGS  += -DUSE_MTK
+IWINFO_LIB_OBJ += iwinfo_mtk.o
 
 
 %.o: %.c

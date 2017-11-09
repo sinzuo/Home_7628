@@ -263,6 +263,7 @@ static int mtk_get_assoclist(const char *ifname, char *buf, int *len)
 			entry.inactive = mt->Entry[i].ConnectedTime * 1000;
 
 			rxrate.word = mt->Entry[i].LastRxRate;
+		//	printf("%X \n ",mt->Entry[i].TxRate);
 			entry.tx_rate.rate = mtk_get_rate(mt->Entry[i].TxRate) * 1000;
 			entry.rx_rate.rate = mtk_get_rate(rxrate) * 1000;
 

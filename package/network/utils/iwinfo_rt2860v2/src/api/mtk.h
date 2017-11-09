@@ -29,13 +29,23 @@ typedef unsigned long	ULONG;
 /* MIMO Tx parameter, ShortGI, MCS, STBC, etc.  these are fields in TXWI. Don't change this definition!!! */
 typedef union _MACHTTRANSMIT_SETTING {
         struct {
+		#if 0
                 USHORT MCS:7;   /* MCS */
                 USHORT BW:1;    /*channel bandwidth 20MHz or 40 MHz */
                 USHORT ShortGI:1;
                 USHORT STBC:2;  /*SPACE */
                 USHORT rsv:3;
                 USHORT MODE:2;  /* Use definition MODE_xxx. */
-        } field;
+		#endif
+        	USHORT MCS:6;
+		USHORT ldpc:1;
+		USHORT BW:2;
+		USHORT ShortGI:1;
+		USHORT STBC:1;
+		USHORT eTxBF:1;
+		USHORT iTxBF:1;
+		USHORT MODE:3;
+	} field;
         USHORT word;
 } MACHTTRANSMIT_SETTING, *PMACHTTRANSMIT_SETTING;
 
