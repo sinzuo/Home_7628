@@ -15,6 +15,7 @@ platform_check_image() {
 
 	case "$board" in
 	mt7628  |\
+	jx 	|\
 	fj	|\
 	sc	|\
 	bl	|\

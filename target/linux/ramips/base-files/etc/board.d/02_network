@@ -138,6 +138,7 @@ ramips_setup_interfaces()
 	mt7621 | \
 	mt7628 | \
 	fj	|\
+	jx	|\
 	mzk-w300nh2 | \
 	mzk-750dhp | \
 	whr-300hp2 | \

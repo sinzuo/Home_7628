@@ -439,7 +439,10 @@ ramips_board_detect() {
 		linkit="$(dd bs=1 skip=1024 count=12 if=/dev/mtd2 2> /dev/null)"
 		if [ "${linkit}" = "LINKITS7688D" ]; then
 			name="linkits7688d"
-			RAMIPS_MODEL="${machine} DUO"
+		
+
+
+	RAMIPS_MODEL="${machine} DUO"
 		else
 			name="linkits7688"
 		fi
@@ -448,6 +451,10 @@ ramips_board_detect() {
 		name="generic"
 		;;
 	esac
+
+	if [ "$machine"  == "ZLT P11(IDU)" ];then
+	 name="jx"
+	fi
 
 	[ -z "$RAMIPS_BOARD_NAME" ] && RAMIPS_BOARD_NAME="$name"
 	[ -z "$RAMIPS_MODEL" ] && RAMIPS_MODEL="$machine"
