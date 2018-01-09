@@ -717,15 +717,48 @@ enable_rt2860v2() {
 					iwpriv $ifname set ApCliEncrypType=WEP
 					iwpriv $ifname set Key0=${key}
 					;;
-				WPA*|wpa*|WPA2-PSK|psk*)
-					echo "WPA2" >>/tmp/wifi_encryption_${ifname}.dat
-					iwpriv $ifname set ApCliAuthMode=WPAPSKWPA2PSK
-					iwpriv $ifname set ApCliEncrypType=AES
-					iwpriv $ifname set ApCliWPAPSK=$key
-					echo "WPAPSKWPA2PSK" >>/tmp/wifi_encryption_${ifname}.dat
-					echo "TKIPAES" >>/tmp/wifi_encryption_${ifname}.dat
-					;;
+                                WPAi2*|wpa2*|WPA2-PSK|psk2*)
+                                        echo "WPA2" >>/tmp/wifi_encryption_${ifname}.dat
+                                        iwpriv $ifname set ApCliAuthMode=WPAPSKWPA2PSK
+                                        iwpriv $ifname set ApCliEncrypType=AES
+                                        iwpriv $ifname set ApCliWPAPSK=$key
+                                        echo "WPAPSKWPA2PSK" >>/tmp/wifi_encryption_${ifname}.dat
+                                        echo "TKIPAES" >>/tmp/wifi_encryption_${ifname}.dat
+                                        ;;               
+                                         
+                              
+                                WPA*|wpa*|WPA-PSK|psk*)
+                                        echo "WPA" >>/tmp/wifi_encryption_${ifname}.dat
+                                        iwpriv $ifname set ApCliAuthMode=WPAPSK
+                                        iwpriv $ifname set ApCliEncrypType=AES
+                                        iwpriv $ifname set ApCliWPAPSK=$key
+                                        echo "WPAPSKWPA2PSK" >>/tmp/wifi_encryption_${ifname}.dat
+                                        echo "TKIPAES" >>/tmp/wifi_encryption_${ifname}.dat
+                                        ;;
+
+
+
+	
 			esac
+
+
+			case "$encryption" in   
+
+                                                                                                                                                                                                             
+                                *tkip+aes*|*tkip+ccmp*|*aes+tkip*|*ccmp+tkip*)                                                                                                                               
+                                                iwpriv $ifname set ApCliEncrypType=TKIPAES                                                                                                                   
+                                                ;;                                                                                                                                                           
+                                *aes*|*ccmp*)                                                                                                                                                                
+                                                iwpriv $ifname set ApCliEncrypType=AES                                                                                                                       
+                                                ;;                                                                                                                                                           
+                                *tkip*)                                                                                                                                                                      
+                                                iwpriv $ifname set ApCliEncrypType=TKIP                                                                                                                      
+                                                echo Warring!!! TKIP not support in 802.11n 40Mhz!!!                                                                                                         
+                                        ;;             
+
+
+			esac
+
 					iwpriv $ifname set ApCliEnable=1
 					ifconfig $ifname up
 					#FIXME:单独STA模式

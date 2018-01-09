@@ -1,0 +1,123 @@
+#!/bin/sh
+
+flag=0
+stanum=0
+
+check_channle(){
+
+	channle_config=`uci get wireless.ra0.channel`
+		
+
+	ssid=`uci get wireless.@wifi-iface[$stanum].ssid`
+	
+	
+#	channle=$(iwinfo ra0 s | grep -A 1 $ssid | grep Channel | awk  '{print $4}')
+
+
+
+
+
+        i=0
+        
+        while [ $i -lt 5 ]
+        do
+ 
+        channle=$(iwinfo ra0 s | grep -A 1 $ssid | grep Channel | awk  '{print $4}')
+        [ -z $channle ] || break
+        
+        i=$(($i+1))
+        
+        done    
+#       channle=$(iwinfo ra0 s | grep -A 1 $ssid  | awk  '{print $5}' )
+
+#       echo $channle
+
+
+        if [ $channle != $channle_config ];then
+
+        uci set wireless.ra0.channel=$channle
+        uci commit wireless
+
+        sleep 1
+        wifi
+        
+        fi
+	
+
+}
+
+
+
+
+is_bridge(){
+
+flag=0
+
+i=0
+#echo "yy"
+while [ $i -lt 4 ]
+do
+
+
+
+
+
+        modeflag=`uci get wireless.@wifi-iface[$i].mode`
+ 
+
+        if [ "$modeflag" == "sta" ];then
+
+	flag=1        
+	stanum=$i
+	
+        break
+        fi
+
+
+        i=$(($i+1))
+#echo "xx"
+done
+
+
+
+
+
+}
+
+
+
+
+while [ 1 ]
+do
+
+# echo "aa"
+  is_bridge
+	#echo "stanum=$stanum"	
+  if [ $flag == 1 ];then	
+
+	 gateway=$(ip route show | grep default  | awk  '{print $3}' )
+
+	 #echo $gateway
+
+		if ping -c 1 -W 1 $gateway  >/dev/null ;then
+
+		flag=1
+		else
+
+
+		check_channle
+			
+		fi
+		
+
+  fi	
+
+
+sleep 15
+
+done
+
+
+
+
+
