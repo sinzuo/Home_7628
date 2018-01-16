@@ -697,6 +697,7 @@ if hwtype == "rt2860v2"  or value == "mt7610"  then
 	s:taboption("advanced", Flag, "doth", "802.11h")
 	s:taboption("advanced", Flag, "wmm", translate("WMM Mode"))
 
+	bssid:depends({mode="sta"}) 
 	bssid:depends({mode="wds"})
 	bssid:depends({mode="adhoc"})
 end
@@ -1046,10 +1047,11 @@ end
 --if apply then
  --       io.popen("/sbin/authwifi")
 --end
-
+--[[
 local apply=luci.http.formvalue("cbi.apply")
 if apply then
         io.popen("/sbin/setbri")
 end
+]]--
 
 return m

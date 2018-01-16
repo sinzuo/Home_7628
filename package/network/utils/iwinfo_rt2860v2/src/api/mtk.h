@@ -61,8 +61,10 @@ typedef struct _RT_802_11_MAC_ENTRY {
         UINT32 ConnectedTime;
         MACHTTRANSMIT_SETTING TxRate;
         UINT32          LastRxRate;
-        SHORT           StreamSnr[3];                           /* BF SNR from RXWI. Units=0.25 dB. 22 dB offset removed */
-        SHORT           SoundingRespSnr[3];                     /* SNR from Sounding Response. Units=0.25 dB. 22 dB offset removed */
+      
+
+/////////for huasuo	   SHORT           StreamSnr[3];                           /* BF SNR from RXWI. Units=0.25 dB. 22 dB offset removed */
+//////  for huasuo        SHORT           SoundingRespSnr[3];                     /* SNR from Sounding Response. Units=0.25 dB. 22 dB offset removed */
 /*      SHORT           TxPER;  */                                      /* TX PER over the last second. Percent */
 /*      SHORT           reserved;*/
 } RT_802_11_MAC_ENTRY, *PRT_802_11_MAC_ENTRY;
