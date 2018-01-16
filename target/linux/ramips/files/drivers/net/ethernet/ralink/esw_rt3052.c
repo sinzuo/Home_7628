@@ -709,6 +709,13 @@ static void esw_hw_init(struct rt305x_esw *esw)
 	for (i = 0; i < RT305X_ESW_NUM_LEDS; i++)
 		esw->ports[i].led = 0x05;
 
+
+
+        val = sysRegRead(0xB0000000 + 0x64);
+        val &= 0xf003f003;
+        sysRegWrite(0xB0000000 + 0x64, val);
+
+
 	/* Apply the empty config. */
 	esw_apply_config(&esw->swdev);
 
