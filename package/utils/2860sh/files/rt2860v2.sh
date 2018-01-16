@@ -717,7 +717,7 @@ enable_rt2860v2() {
 					iwpriv $ifname set ApCliEncrypType=WEP
 					iwpriv $ifname set Key0=${key}
 					;;
-                                WPAi2*|wpa2*|WPA2-PSK|psk2*)
+                                WPAi2*|wpa2*|WPA2-PSK|psk2*|*+psk2)
                                         echo "WPA2" >>/tmp/wifi_encryption_${ifname}.dat
                                         iwpriv $ifname set ApCliAuthMode=WPAPSKWPA2PSK
                                         iwpriv $ifname set ApCliEncrypType=AES
@@ -898,10 +898,10 @@ enable_rt2860v2() {
 				do
 				
 				bridge="$(bridge_interface "$net_cfg")"
-				echo "aa$net_cfg= bb $bridge=">/root/c
+			#	echo "aa$net_cfg= bb $bridge=">/root/c
 
 				if [ "$bridge" == "br-$net_cfg" ];then
-				echo "break is here count=$count">/root/d
+			#	echo "break is here count=$count">/root/d
 				break
 				fi				
 
