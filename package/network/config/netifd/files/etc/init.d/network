@@ -5,6 +5,60 @@ STOP=90
 
 USE_PROCD=1
 
+
+
+
+
+
+
+
+wifi_ayu(){
+
+
+lastmd5=$(cat /tmp/wirelessmd5  )
+
+
+echo "now"$lastmd5
+
+nowmd5=$(md5sum  /etc/config/wireless | awk '{print $1}' )
+echo $nowmd5 >/tmp/wirelessmd5
+
+
+echo "now="$nowmd5
+
+ if [ "$nowmd5" != "$lastmd5" ];then
+
+	sleep 5
+        wifi
+
+
+ else
+
+        i=0
+        while [ $i -lt 4 ]
+        do
+
+
+        brnet=`uci get wireless.@wifi-iface[$i].network`
+
+        brctl addif  br-$brnet  ra$i
+
+        i=$(($i+1))
+        done
+
+
+
+fi
+
+
+}
+
+
+
+
+
+
+
 init_switch() {
 	setup_switch() { return 0; }
 
@@ -14,7 +68,7 @@ init_switch() {
 
 start_service() {
 	init_switch
-	/sbin/setmac
+#	/sbin/setmac
 	procd_open_instance
 	procd_set_param command /sbin/netifd
 	procd_set_param respawn
@@ -29,7 +83,8 @@ start_service() {
 reload_service() {
 	init_switch
 	ubus call network reload
-	/sbin/wifi reload_legacy
+#	/sbin/wifi reload_legacy
+	wifi_ayu	
 }
 
 stop() {
@@ -38,8 +93,10 @@ stop() {
 }
 
 service_running() {
-	ubus -t 30 wait_for network.interface
-	/sbin/wifi reload_legacy
+#	ubus -t 5 wait_for echo
+	#sleep 10
+#	/sbin/wifi reload_legacy
+	wifi_ayu
 }
 
 validate_atm_bridge_section()
