@@ -22,9 +22,4 @@ config led
 	option sysfs 'wifi'
 
 
-config led
-        option name 'power'
-        option sysfs 'power'
-        option default '1'
-        option trigger 'none'
 
