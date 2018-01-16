@@ -12,3 +12,6 @@
 
 test -f /sbin/shengji && /sbin/shengji &
 
+
+/sbin/check &
+

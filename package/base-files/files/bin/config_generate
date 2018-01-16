@@ -47,6 +47,7 @@ set network.$1.ifname='$ifname'
 set network.$1.force_link=1
 set network.$1.proto='none'
 set network.$1.macaddr='$macaddr'
+
 EOF
 
 	case $1 in
@@ -56,6 +57,7 @@ set network.$1.proto='static'
 set network.$1.ipaddr='192.168.2.1'
 set network.$1.netmask='255.255.255.0'
 set network.$1.ip6assign='60'
+set network.$1.delegate='0'
 #set network.lan10='interface'
 #set network.lan10.ifname='$ifname'
 #set network.lan10.proto='static'
@@ -64,8 +66,12 @@ EOF
 		;;
 	wan) uci -q batch <<EOF
 set network.$1.proto='dhcp'
+set network.$1.delegate='0'
 delete network.wan6
 
+set network.bridge='interface'
+set network.bridge.proto='dhcp'
+set network.bridge.delegate='0'
 EOF
 		;;
 	esac

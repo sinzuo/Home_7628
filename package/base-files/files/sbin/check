@@ -1,7 +1,53 @@
 #!/bin/sh
 
+urlweb="www.baidu.com  www.qq.com  www.aliyun.com"
+
+
+
 flag=0
 stanum=0
+
+check_online()
+{
+
+#urlweb="www.baidu.com  www.qq.com  www.aliyun.com"
+renew=1
+echo "test.....check_online"
+
+for url in $urlweb
+do
+
+
+if ping -c 2 -W 1 $url >/dev/null ;then
+
+echo "yes"
+renew=0
+
+break
+else
+
+# udhcpc -q -i br-lan Renew
+ echo "no"
+ echo $url
+ continue
+fi
+
+done
+
+if [ $renew -eq 1 ];then
+
+
+
+        killall -9 udhcpc
+
+
+fi
+
+}
+
+
+
+
 
 check_channle(){
 
@@ -10,10 +56,13 @@ check_channle(){
 
 	ssid=`uci get wireless.@wifi-iface[$stanum].ssid`
 	
-	
+	bssid=`uci get wireless.@wifi-iface[$stanum].bssid`	
 #	channle=$(iwinfo ra0 s | grep -A 1 $ssid | grep Channel | awk  '{print $4}')
 
 
+	                                                                                   
+        echo "ssid=$ssid"   
+        echo "bssid=$bssid" 
 
 
 
@@ -32,6 +81,16 @@ check_channle(){
 
 #       echo $channle
 
+
+       [ -z $channle ] && {
+        
+        echo "get channel by bssid"
+        iwpriv ra0 set SiteSurvey=1
+        channle=$(iwpriv ra0 get_site_survey | grep $bssid | awk '{print $1}')
+
+        
+        echo "channel=$channle" 
+        }  
 
         if [ $channle != $channle_config ];then
 
@@ -99,7 +158,7 @@ do
 
 	 #echo $gateway
 
-		if ping -c 1 -W 1 $gateway  >/dev/null ;then
+		if ping -c 3 -W 1 $gateway  >/dev/null ;then
 
 		flag=1
 		else
@@ -113,7 +172,8 @@ do
   fi	
 
 
-sleep 15
+sleep 20
+check_online
 
 done
 
