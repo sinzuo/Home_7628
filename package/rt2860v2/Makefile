@@ -1,0 +1,66 @@
+#
+# Copyright (C) 2006-2009 OpenWrt.org
+#
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
+#
+
+include $(TOPDIR)/rules.mk
+include $(INCLUDE_DIR)/kernel.mk
+
+PKG_NAME:=rt2860v2
+
+PKG_REV:=2714
+PKG_VERSION:=r$(PKG_REV)
+PKG_RELEASE:=6
+
+PKG_BUILD_DIR:=$(KERNEL_BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
+
+include $(INCLUDE_DIR)/package.mk
+
+PKG_KCONFIG:=MT7628_AP_V24_DATA_STRUCTURE MT7628_AP_LED MT7628_AP_WSC MT7628_AP_WSC_V2 MT7628_AP_LLTD MT7628_AP_WDS MT7628_AP_WMM_ACM MT7628_AP_MBSS MT7628_AP_APCLI MT7628_AP_MAC_REPEATER MT7628_AP_IGMP_SNOOP MT7628_AP_NETIF_BLOCK MT7628_AP_DFS MT7628_AP_CARRIER MT7628_AP_DLS MT7628_AP_IDS MT7628_HW_ANTENNA_DIVERSITY MT7628_AP_WAPI MT7628_AP_COC MT7628_AP_MEMORY_OPTIMIZATION MT7628_AP_VIDEO_TURBINE MT7628_AP_INTELLIGENT_RATE_ADAPTION MT7628_AP_TXBF MT7628_EXT_CHANNEL_LIST MT7628_KTHREAD MT7628_AUTO_CH_SELECT_ENHANCE MT7628_AP_80211N_DRAFT3 MT7628_AP_RTMP_INTERNAL_TX_ALC MT7628_ADJ_PWR_CONSUMPTION_SUPPORT MT7628_SINGLE_SKU MT7628_AP_RTMP_INTERNAL_TX_ALC MT7628_AP_RTMP_TEMPERATURE_COMPENSATION MT7628_80211R_FT MT7628_80211R_RR MT7628_MCAST_RATE_SPECIFIC MT7628_SNMP RA_CLASSIFIER RT_ATE RT_ATE RT_QA
+
+define KernelPackage/rt2860v2
+  CATEGORY:=MT7628
+  TITLE:=Driver for MT7620
+  DEPENDS:=@TARGET_ramips +wireless-tools +maccalc
+  DEFAULT:=y if (CONFIG_TARGET_ramips_mt7620n || CONFIG_TARGET_ramips_mt7620a)
+  FILES:=$(PKG_BUILD_DIR)/mt7628_ap/rt2860v2_ap.ko
+  AUTOLOAD:=$(call AutoLoad,50,rt2860v2_ap)
+endef
+
+define KernelPackage/rt2860v2/description
+ This package contains a driver for MT7620
+endef
+
+define KernelPackage/rt2860v2/config
+	source "$(SOURCE)/config.in"
+endef
+
+SOURCE_DIR:=$(PKG_BUILD_DIR)
+export SOURCE_DIR
+
+MAKEOPTS:= -C $(LINUX_DIR) \
+                ARCH="$(LINUX_KARCH)" \
+                CROSS_COMPILE="$(TARGET_CROSS)" \
+                M="$(PKG_BUILD_DIR)/mt7628_ap" \
+                CONFIG_MT7628_AP=m \
+		$(foreach c, $(PKG_KCONFIG),$(if $(CONFIG_$c),CONFIG_$(c)=y)) \
+		modules
+
+define Build/Prepare
+	$(call Build/Prepare/Default)
+	$(CP) -r files/. $(PKG_BUILD_DIR)
+endef
+
+
+define Build/Compile
+	$(MAKE) $(MAKEOPTS)
+endef
+
+#define KernelPackage/rt2860v2/install
+#	$(INSTALL_DIR) $(1)/lib/wifi
+#	$(INSTALL_DATA) ./files/rt2860v2.sh $(1)/lib/wifi
+#endef
+
+$(eval $(call KernelPackage,rt2860v2))
