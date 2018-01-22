@@ -136,10 +136,10 @@ do
         i=$(($i+1))
 #echo "xx"
 done
+	disableflg=`uci get wireless.@wifi-iface[$stanum].disabled` 
+	[ $disableflg = 1 ] && flag=0
 
-
-
-
+	
 
 }
 
