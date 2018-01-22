@@ -139,15 +139,14 @@ rt2860v2_prepare_config() {
 	config_get vifs "$device" vifs
 
 #大于11的时候支持11-14号频道
-#	[ "$channel" != "auto" ] && {
-#	[ ${channel:-0} -ge 1 -a ${channel:-0} -le 11 ] && countryregion=0
-#	[ ${channel:-0} -ge 12 -a ${channel:-0} -le 13 ] && countryregion=1
-#	[ ${channel:-0} -eq 14 ] && countryregion=31
-#	debug "channel=$channel countryregion=$countryregion"
-#	}
+	[ "$channel" != "auto" ] && {
+	[ ${channel:-0} -ge 1 -a ${channel:-0} -le 11 ] && countryregion=0
+	[ ${channel:-0} -ge 12 -a ${channel:-0} -le 13 ] && countryregion=1
+	[ ${channel:-0} -eq 14 ] && countryregion=31
+	debug "channel=$channel countryregion=$countryregion"
+	}
+
 	countryregion=1
-
-
 #获取虚拟接口的数量，并提前配置SSID
 for vif in $vifs; do
 	config_get_bool disabled "$vif" disabled 0
@@ -592,16 +591,13 @@ enable_rt2860v2() {
 	mkdir -p /etc/Wireless/RT2860/ 2>/dev/null
 	ln -s /tmp/RT2860.dat /etc/Wireless/RT2860/RT2860.dat 2>/dev/null
 	}
-	
-		[ -f /etc/Wireless/RT2860/RT2860AP.dat ] || {
-	mkdir -p /etc/Wireless/RT2860/ 2>/dev/null
-	ln -s /tmp/RT2860.dat /etc/Wireless/RT2860/RT2860AP.dat 2>/dev/null
-	}
 
         #[ -f /etc/wireless/mt7628/mt7628.dat ] || {                             
         #mkdir -p /etc/wireless/mt7628/ 2>/dev/null                              
         #}                                                                       
                                                                                 
+        rm /etc/wireless/mt7628/mt7628.dat                                     
+        ln -s /tmp/RT2860.dat /etc/wireless/mt7628/mt7628.dat 2>/dev/null       
            	
 	
 	#重置整个驱动
@@ -646,10 +642,9 @@ enable_rt2860v2() {
 			continue
 		}
 		
-		local ifname encryption key ssid mode network
+		local ifname encryption key ssid mode
 		
-#		config_get ifname $vif device		
-		config_get network $vif network	
+#		config_get ifname $vif device			
 		config_get encryption $vif encryption
 		config_get key $vif key
 		config_get ssid $vif ssid
@@ -717,6 +712,7 @@ enable_rt2860v2() {
 					iwpriv $ifname set ApCliEncrypType=WEP
 					iwpriv $ifname set Key0=${key}
 					;;
+					
                                 WPAi2*|wpa2*|WPA2-PSK|psk2*|*+psk2)
                                         echo "WPA2" >>/tmp/wifi_encryption_${ifname}.dat
                                         iwpriv $ifname set ApCliAuthMode=WPAPSKWPA2PSK
@@ -724,9 +720,9 @@ enable_rt2860v2() {
                                         iwpriv $ifname set ApCliWPAPSK=$key
                                         echo "WPAPSKWPA2PSK" >>/tmp/wifi_encryption_${ifname}.dat
                                         echo "TKIPAES" >>/tmp/wifi_encryption_${ifname}.dat
-                                        ;;               
+                                        ;;
+
                                          
-                              
                                 WPA*|wpa*|WPA-PSK|psk*)
                                         echo "WPA" >>/tmp/wifi_encryption_${ifname}.dat
                                         iwpriv $ifname set ApCliAuthMode=WPAPSK
@@ -742,22 +738,21 @@ enable_rt2860v2() {
 			esac
 
 
-			case "$encryption" in   
-
-                                                                                                                                                                                                             
-                                *tkip+aes*|*tkip+ccmp*|*aes+tkip*|*ccmp+tkip*)                                                                                                                               
-                                                iwpriv $ifname set ApCliEncrypType=TKIPAES                                                                                                                   
-                                                ;;                                                                                                                                                           
-                                *aes*|*ccmp*)                                                                                                                                                                
-                                                iwpriv $ifname set ApCliEncrypType=AES                                                                                                                       
-                                                ;;                                                                                                                                                           
-                                *tkip*)                                                                                                                                                                      
-                                                iwpriv $ifname set ApCliEncrypType=TKIP                                                                                                                      
-                                                echo Warring!!! TKIP not support in 802.11n 40Mhz!!!                                                                                                         
-                                        ;;             
-
-
+			case "$encryption" in
+			*tkip+aes*|*tkip+ccmp*|*aes+tkip*|*ccmp+tkip*)
+				iwpriv $ifname set ApCliEncrypType=TKIPAES
+				 ;;
+			 *aes*|*ccmp*)
+				iwpriv $ifname set ApCliEncrypType=AES
+				;;
+			*tkip*)
+				iwpriv $ifname set ApCliEncrypType=TKIP
 			esac
+
+
+
+
+
 
 					iwpriv $ifname set ApCliEnable=1
 					ifconfig $ifname up
@@ -891,25 +886,18 @@ enable_rt2860v2() {
 		{
 			count=0
 			local net_cfg bridge
-		#	net_cfg="$(find_net_config "$vif")"
-		#	[ -z "$net_cfg" ]||{
-				net_cfg=$network		
-				while [ $count -lt 15 ]
-				do
+			net_cfg="$(find_net_config "$vif")"
+			[ -z "$net_cfg" ]||{
 				
 				bridge="$(bridge_interface "$net_cfg")"
-			#	echo "aa$net_cfg= bb $bridge=">/root/c
-
-				if [ "$bridge" == "br-$net_cfg" ];then
-			#	echo "break is here count=$count">/root/d
-				break
-				fi				
-
+				while [ $count -lt 3 ]
+				do
+					[ -z "$bridge" ] || break
 					count=$(($count+1))
 					echo "count="$count
 					sleep 1
 				done		
-				if [ $count -lt 15 ];then
+				if [ $count -lt 3 ];then
 			
 				config_set "$vif" bridge "$bridge"
 				rt2860v2_start_vif "$vif" "$ifname"
@@ -918,7 +906,7 @@ enable_rt2860v2() {
 				brctl addif $(bridge_interface "$net_cfg") $ifname
 				}
 				fi
-		#	}
+			}
 
 
 
@@ -983,10 +971,7 @@ detect_rt2860v2() {
 
 
 
-		[ -f /etc/Wireless/RT2860/RT2860AP.dat ] || {
-	mkdir -p /etc/Wireless/RT2860/ 2>/dev/null
-	ln -s /tmp/RT2860.dat /etc/Wireless/RT2860/RT2860AP.dat 2>/dev/null
-	}
+
 	
 	
 	local pre_wpa2_key
@@ -1022,6 +1007,14 @@ config wifi-iface
 #	option key $pre_wpa2_key
 	
 
+#config wifi-iface
+#        option device   ra${i}
+#        option network  wwan
+#        option mode     ap
+#        option ssid     andWiFi
+#        option encryption none
+#       option encryption psk2
+#       option key $pre_wpa2_key
 
 
 EOF

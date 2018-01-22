@@ -223,6 +223,28 @@ scan_wifi() {
 DEVICES=
 DRIVERS=
 include /lib/wifi
+
+[ -f /tmp/wifi.pid ] && {
+
+#        echo "zzz"
+        pid=`cat /tmp/wifi.pid`
+#        echo $pid
+
+        isexit=`ps |  awk  '{print$1}' |grep -w $pid `
+
+#        echo "isexit"$isexit
+
+        [ -z "$isexit" ] || exit
+
+}
+
+echo $$>/tmp/wifi.pid
+
+
+
+
+
+
 scan_wifi
 
 case "$1" in

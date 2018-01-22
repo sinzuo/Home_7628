@@ -210,10 +210,10 @@ config MT7628_LLTD_SUPPORT
 	bool "LLTD (Link Layer Topology Discovery Protocol)"
 	depends on MT7628_MT_AP_SUPPORT
 
-#config MT7628_COC_SUPPORT
-#	bool "CoC Support"
-#	depends on MT7628_MT_AP_SUPPORT
-#	default n
+config MT7628_COC_SUPPORT
+	bool "CoC Support"
+	depends on MT7628_MT_AP_SUPPORT
+	default n
 
 #config MT7628_ RT2860V2_SNMP
 #	bool "Net-SNMP Support"

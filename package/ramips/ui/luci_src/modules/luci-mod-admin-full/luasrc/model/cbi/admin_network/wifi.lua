@@ -159,11 +159,13 @@ for _, net in ipairs(wdev:get_wifinets()) do
 	end
 end
 
+--[[
 if has_sta then
 	ch = s:taboption("general", DummyValue, "choice", translate("Channel"))
 	ch.value = translatef("Locked to channel %d used by %s",
 		has_sta:channel(), has_sta:shortname())
 else
+]]--
 	ch = s:taboption("general", ListValue, "channel", translate("Channel"))
 	ch:value("auto", translate("auto"))
 	ch:value("1", translate("1"))
@@ -180,7 +182,7 @@ else
 	ch:value("12", translate("12"))
 	ch:value("13", translate("13"))
 
-end
+--end
 
 ------------------- MAC80211 Device ------------------
 
