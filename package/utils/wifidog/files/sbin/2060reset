@@ -4,6 +4,8 @@
 killall -9 wifidog
 
 /etc/init.d/firewall restart 
+/etc/init.d/dnsmasq restart
 
 sleep 1
+
 

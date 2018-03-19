@@ -33,7 +33,7 @@ define Package/wifidog/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) ./files/usr/bin/wifidog $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP)  ./files/usr/lib/* $(1)/usr/lib/
+	$(CP)   ./files/usr/lib/* $(1)/usr/lib/
 	$(INSTALL_DIR) $(1)/etc
 	$(INSTALL_DATA) ./files/wifidog.key $(1)/etc/
 	$(INSTALL_DATA) ./files/wifidog.crt $(1)/etc/

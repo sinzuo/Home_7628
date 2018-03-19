@@ -9,6 +9,7 @@ config wifidog 'wifidog'
 	option gateway_hostname '121.43.232.251'
 	option gateway_httpport '8082'
 	option gateway_path '/wifiaaa/'
+	list whitelist 'wifi.weixin.qq.com'
 
 config wifidog_deamo 'wifidog_deamo'
 	option enable '1'

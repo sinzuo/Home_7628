@@ -50,6 +50,8 @@ end
 	client_timeout = s:option(Value,"client_timeout","客户端超时","接入客户端认证超时，默认5分")
 	client_timeout.default = "5"
 	whitelist = s:option(DynamicList,"whitelist","域名白名单")
+	allowwhitelist = s:option(DynamicList,"allowwhitelist","认证后白名单")
+	authdenylist = s:option(DynamicList,"authdenylist","认证后黑名单")
 	--[[Peer]]--
 	--s = m:section(TypedSection, "wifidog_deamo", "wifiant监测")
 	--s.anonymous = false
