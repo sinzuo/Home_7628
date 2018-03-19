@@ -77,6 +77,10 @@
 
 	gpio-leds {
 		compatible = "gpio-leds";
+		net {
+			label = "net";
+			gpios = <&gpio1 14 1>;
+		};
 		wifi {
 			label = "wifi";
 			gpios = <&gpio1 12 1>;

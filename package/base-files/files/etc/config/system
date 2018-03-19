@@ -21,5 +21,14 @@ config led
 	option mode 'link tx rx'
 	option sysfs 'wifi'
 
+config led
+        option name 'net'
+        option sysfs 'net'
+        option default '1'
+        option trigger 'netdev'
+        option dev 'eth0.2'
+        option mode 'link tx rx'
+
+
 
 
