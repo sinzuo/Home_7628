@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start(){
+	sleep 10   #waiting for network interface up
+	service_start /usr/sbin/autorelayserver -i br-lan
+}
+
+stop(){
+	service_stop /usr/sbin/autorelayserver	
+}
+
+restart(){
+        stop
+        start
+}
