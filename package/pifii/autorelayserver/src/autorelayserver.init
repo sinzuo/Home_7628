@@ -5,11 +5,12 @@ set_hidden_ssid()
 {
 isssid=$(uci show wireless | grep ssid=\'tozed-zhongji\')
 if [ "" == "$isssid" ];then
-i=$(uci show wireless | grep ]=wifi-iface | tail -n 1 | tr -s "[|]" = |awk -F= '{print $2}')
+#i=$(uci show wireless | grep ]=wifi-iface | tail -n 1 | tr -s "[|]" = |awk -F= '{print $2}')
+i=$(uci show wireless | grep -E "]=wifi-iface|relay=wifi-iface" | wc -l)
 if [ "" == "$i" ];then
     i=0
 else
-    i=$(($i + 1))
+    i=$(($i + 0))
 fi
 uci -q add wireless wifi-iface >/dev/null 2>&1
 uci -q batch<<EOF
