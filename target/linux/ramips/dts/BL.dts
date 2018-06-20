@@ -77,8 +77,8 @@
 
 	gpio-leds {
 		compatible = "gpio-leds";
-		power {
-			label = "power";
+		wps {
+			label = "wps";
 			gpios = <&gpio1 5 1>;
 		};
 		wifi {
