@@ -1,0 +1,12 @@
+#!/bin/sh
+flag=0
+for v in $*; do
+iwpriv $v set WscConfMode=7 >/dev/null 2>&1
+iwpriv $v set WscMode=2     >/dev/null 2>&1
+iwpriv $v set WscGetConf=1  >/dev/null 2>&1
+flag=1
+done
+lf="/sys/class/leds/wps/brightness"
+if [ 1 == $flag ]; then
+test -f $lf && echo 1 >$lf && sleep 120 && echo 0 >$lf
+fi
