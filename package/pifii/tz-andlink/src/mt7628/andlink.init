@@ -1,0 +1,22 @@
+#!/bin/sh /etc/rc.common
+
+START=97
+
+ser="/usr/sbin/coap-server -v 7"
+rep="/usr/sbin/andlink-report"
+
+start(){
+        service_start $ser
+        sleep 5
+        $rep &
+}
+
+stop(){
+        service_stop $ser 
+        killall andlink-report
+}
+
+restart(){
+        stop
+        start
+}

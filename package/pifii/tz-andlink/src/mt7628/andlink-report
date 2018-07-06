@@ -1,0 +1,321 @@
+#!/usr/bin/lua
+local json = require("luci.json")
+local util = require ("luci.util")
+require "luci.model.uci"
+local uci = luci.model.uci.cursor()
+
+--log 
+local log_file = "/tmp/tzandlinkreport.log"
+local log_flag = 0 -- nil:don't print log,0:print log to file,1: print log to stdout 
+local log_max = 5000 --max line num
+
+function log_info(info)
+    if log_flag then
+        clean_log()
+        if not info then info = " " end 
+        if "table" == type(info) then info = json.encode(info) end
+        local str_time = os.date("%Y-%m-%d %H:%M:%S",os.time())
+        if 0 == log_flag + 0 then
+            local lf = io.open(log_file, "a+")
+            io.output(lf) 
+            io.write(string.format([[%s -->> %s%s]],str_time,string.gsub(info,"\n",""),"\n"))
+            io.close(lf)
+        else
+            print(str_time.." -->> "..info)
+        end 
+    end 
+end
+
+function clean_log()
+    if log_file then
+        if 0 == os.execute("test -f "..log_file) then
+            local function exec(command)
+                local pp   = io.popen(command)
+                local data = pp:read("*a")
+                pp:close()
+                return data
+            end
+            local num = exec("wc -l "..log_file.." 2>&1 | awk \'{print $1}\' ")
+            num = tonumber(num) or 1
+            if log_max <= num + 0 then
+               os.execute("echo -n \' \' > "..log_file)
+            end 
+        end 
+    end 
+end
+local D = log_info 
+--log end
+
+--common
+function split(str, delimiter)
+    local fs = delimiter
+    if not fs or "" == string.gsub(fs," ","") then
+                fs="%s"
+        end
+    if str==nil or str=="" or delimiter==nil then
+        return nil
+    end
+    local result = {}
+        for match in string.gmatch((str..delimiter),"[^"..fs.."]+") do
+        table.insert(result, match)
+    end
+    return result
+end
+
+function check_ip(ip)
+    if not ip or "" == ip then return nil end
+    local ipt = split(ip,"\.")
+    local num = nil
+    if 4 ~= #ipt then return nil end
+    num = tonumber(ipt[1]); if not num or 0 > num or 255 < num then return nil end
+    num = tonumber(ipt[2]); if not num or 0 > num or 255 < num then return nil end
+    num = tonumber(ipt[3]); if not num or 0 > num or 255 < num then return nil end
+    num = tonumber(ipt[4]); if not num or 0 > num or 255 < num then return nil end
+    return ipt
+end
+
+function get_broadcast(ip,mask)
+    local ipt = check_ip(ip)
+    mask = tonumber(mask)
+    if not ipt or not mask or 0 > mask or 32 < mask then return nil end
+    local function get_one(c)
+        local i,s = 1,""
+        c = c or 0
+        while i <= c do s = s.."1";i = i + 1 end 
+        return s
+    end
+    local h2b = {
+        ["0"] = "0000",["1"] = "0001",["2"] = "0010",["3"] = "0011",
+        ["4"] = "0100",["5"] = "0101",["6"] = "0110",["7"] = "0111",
+        ["8"] = "1000",["9"] = "1001",["A"] = "1010",["B"] = "1011",
+        ["C"] = "1100",["D"] = "1101",["E"] = "1110",["F"] = "1111" 
+    }
+    local b2h = {
+        ["0000"]= "0",["0001"]= "1",["0010"]= "2",["0011"]= "3",
+        ["0100"]= "4",["0101"]= "5",["0110"]= "6",["0111"]= "7",
+        ["1000"]= "8",["1001"]= "9",["1010"]= "A",["1011"]= "B",
+        ["1100"]= "C",["1101"]= "D",["1110"]= "E",["1111"]= "F",
+    }
+    local s, ips = "", nil
+    for k,v in pairs(ipt) do
+        ips = string.format("%02X",tonumber(v))
+        if 2 ~= string.len(ips) then  break end
+        s = s..h2b[string.sub(ips,1,1)]..h2b[string.sub(ips,2,2)]
+    end
+    local mb=string.sub(s,1,mask)..get_one(32 - tonumber(mask))
+    local bc, i, t = "", 8, nil
+    while i <= string.len(mb) do
+        if "" ~= bc then bc = bc.."." end
+        t = b2h[string.sub(mb,i - 7,i - 4)]..b2h[string.sub(mb,i - 3,i)] 
+        bc = bc..tonumber(t,16)
+        i = i + 8
+    end
+    return bc
+end
+
+function get_sn(mac)
+    mac = string.gsub(mac,":","")
+    local mh = string.sub(mac,1,6)
+    local mt = string.sub(mac,7,12)
+    return string.format("%08dA%08d",tonumber(mh,16),tonumber(mt,16))
+end
+
+function get_mac()
+    local mac=util.exec([[dd bs=1 skip=4 count=6 if=/dev/mtdblock2 2>/dev/null | hexdump -vC|grep 00000000|awk '{printf("%s",toupper($2$3$4$5$6$7))}']]);
+    return mac  
+end
+
+function get_device_ip()
+    local ifa = util.ubus("network.interface.lan","status")
+    local res = nil  
+    local mask = nil
+    if ifa and "dhcp" ~= ifa.proto then
+        ifa = util.ubus("network.interface.wan","status")
+    end 
+    if ifa and ifa["ipv4-address"] and ifa["ipv4-address"][1] then
+        res = ifa["ipv4-address"][1]["address"]
+        mask = ifa["ipv4-address"][1]["mask"]
+    end 
+    return res,get_broadcast(res,mask)
+end
+
+function get_online_data()
+    uci:load("andlink")
+    local devid = uci:get("andlink","andlink","device_id")
+    if not devid or "" == devid then
+        return nil
+    end
+    local sm=util.exec([[cat /tmp/sysinfo/board_name | tr -d "\n"]]) or ""
+    local sv=util.exec([[cat /etc/openwrt_version | tr -d "\n|\r"]])
+    local devmac = get_mac()
+    local d = {
+              deviceId = devid,
+              deviceMac = devmac,
+              deviceType = uci:get("andlink","andlink","devicetype") or "30932", 
+              firmwareVersion = sm.."_"..sv,--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
+              softwareVersion = sv,--util.exec([[grep soft_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
+              ipAddress = get_device_ip(),
+              timestamp = os.time(),
+              XData = {
+                      deviceVendor = "SZTozed",
+                      deviceModel = uci:get("andlink","andlink","devicemodel") or "ZY366TZ",
+                      deviceSn = get_sn(devmac), --"C170710010116021863",
+                      apUplinType = "Ethernet",
+                      radio5 = 0,
+                      syncCode = uci:get("andlink","andlink","sysc_code") or "0"
+              }
+    }
+    return d 
+end
+
+function device_register()
+    local gwip=nil
+    local recv_data=nil; 
+    local recv_t=nil; 
+    --send broadcast pack, search gateway
+    local bcip = nil
+    local bc_cmd = nil
+    while(not gwip or "" == gwip) do
+        _,bcip = get_device_ip()
+        if not bcip then bcip = "255.255.255.255" end
+        bc_cmd=string.format([[coap-broadcast coap://%s/qlink/searchgw -e '{"searchKey":"ANDLINK-DEVICE","andlinkVersion":"V2"}']],bcip)
+        D(bc_cmd)
+        res=util.exec(bc_cmd)
+        os.execute([[sleep 5]]);
+        uci:load("andlink")
+        gwip=uci:get("andlink","andlink","gateway")
+        if gwip and "" ~= gwip then
+            D("get gateway ip:"..gwip)
+            break
+        end
+        os.execute([[sleep 30]]);
+    end
+    --device register 
+    --if not devid or "" == devid then
+        local dt=uci:get("andlink","andlink","devicetype") or "30932"
+        local ptoken=uci:get("andlink","andlink","producttoken") or "4Ojrv9Sm6Fgblsxm"
+        local register_t={
+                  deviceMac=get_mac(),
+                  deviceType=dt,
+                  --productToken=util.exec(string.format([[echo -n %s | md5sum | awk '{print$1}' | tr -d "\n"]],dt)),
+                  productToken=ptoken,
+                  timestamp=os.time()
+              } 
+        local str_json = json.encode(register_t); 
+        local reg_cmd=string.format([[coap-client coap://%s/device/inform/bootstrap -B 5 -m POST -e '%s']],gwip,str_json);
+        D(reg_cmd)
+        recv_data=util.exec(reg_cmd); 
+        if recv_data and "" ~= recv_data then 
+            D(recv_data)
+            recv_t = json.decode(recv_data)
+            if recv_t and recv_t["deviceId"] and recv_t["deviceToken"] and recv_t["andlinkToken"] then
+                local devtk=recv_t["deviceToken"] or ""; 
+                local altk=recv_t["andlinkToken"] or ""; 
+                if ("0000000000000000" == devtk or 16 == string.len(devtk)) 
+                  and ("0000000000000000" == altk  or 16 == string.len(altk)) then 
+                    uci:load("andlink") 
+                    uci:set("andlink","andlink","device_id",recv_t["deviceId"]) 
+                    uci:set("andlink","andlink","device_token",devtk) 
+                    uci:set("andlink","andlink","andlink_token",altk) 
+                    uci:set("andlink","andlink","gateway_token",recv_t["gwToken"] or '') 
+                    uci:commit("andlink") 
+                    D("register ok") 
+                end
+            end
+        end
+    --end 
+end
+
+function main()
+    local res=nil
+    local hb_time=nil
+    local recv_data=nil
+    local recv_t=nil; 
+ 
+    local gwip=nil
+    local devid=nil
+    uci:load("andlink")
+    gwip=uci:get("andlink","andlink","gateway")
+    devid = uci:get("andlink","andlink","device_id")  
+    while true do
+        if not gwip or "" == gwip or not devid or "" == devid then 
+            device_register()
+            gwip=uci:get("andlink","andlink","gateway")
+        end
+        
+        --online
+        local od = get_online_data()
+        if not od then
+            D("error:get online data failed!")
+            return -1 
+        end
+        local str_od = json.encode(od)
+        local online_cmd=string.format([[coap-client coap://%s/device/inform/boot -B 5 -m POST -e '%s']],gwip,str_od);
+        D(online_cmd)
+        recv_data = util.exec(online_cmd) 
+        if recv_data and "" ~= recv_data then
+           D(recv_data)
+           recv_t = json.decode(recv_data) 
+           if recv_t and recv_t["timestamp"] and recv_t["heartBeatTime"] then
+               hb_time = tonumber(recv_t["heartBeatTime"])
+               uci:set("andlink","andlink","heartbeat_time",hb_time) 
+               break
+           end
+        end
+        gwip = nil --register again
+        os.execute("sleep 16") 
+    end
+
+    --sysupgrade event 
+    local ev=uci:get("andlink","event","preversion")
+    if ev and "" ~= ev then
+        local sv=util.exec([[cat /etc/openwrt_version | tr -d "\n|\r"]])
+        if "" ~= sv and ev ~= sv then
+            local evd={deviceId=devid,eventType="File",timestamp=os.time(),data={respCode=2001,respCont="File Upgrade Success"}}
+            local ev_cmd = string.format([[coap-client coap://%s/device/inform/data -B 2 -m POST -e '%s']],gwip,json.encode(evd))
+            D(ev_cmd)
+            recv_data = util.exec(ev_cmd) 
+            if recv_data and "" ~= recv_data then
+               D(recv_data)
+               recv_t = json.decode(recv_data) 
+               if recv_t and recv_t["respCode"] and 1 == tonumber(recv_t["respCode"]) then
+                   uci:delete("andlink","event","preversion")
+                   uci:commit("andlink")
+               end
+            end
+        end
+    end
+
+    --heartbeat 
+    local str_hb = nil --json.encode(hb)
+    local hb_cmd = nil--string.format([[coap-client coap://%s/device/inform/heartbeat -m POST -e '%s']],gwip,str_hb);
+    local hb_count = 0
+    while true do
+        uci:load("andlink")
+        gwip=uci:get("andlink","andlink","gateway") --must get gateway addr agin
+        devid = uci:get("andlink","andlink","device_id") --must get device id again 
+        if not gwip or "" == gwip or not devid or "" == devid then 
+            D("device was unbound")
+            break
+        end
+        str_hb = json.encode({deviceId=devid})
+        hb_cmd=string.format([[coap-client coap://%s/device/inform/heartbeat -B 2 -m POST -e '%s']],gwip,str_hb);
+        D(hb_cmd)
+        recv_data = util.exec(hb_cmd)
+        if recv_data then
+            D(recv_data)
+            recv_t = json.decode(recv_data)
+            if (not recv_t or 1 ~= tonumber(recv_t["respCode"])) then
+                if 10 < hb_count then 
+                    break
+                else
+                    hb_count = hb_count + 1
+                end 
+            end
+        end
+        os.execute("sleep "..(hb_time/1000)) 
+    end
+    --heart beat
+end
+
+main()
