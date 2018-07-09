@@ -1,0 +1,43 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+set_hidden_ssid()
+{
+isssid=$(uci show wireless | grep ssid=\'tozed-zhongji\')
+if [ "" == "$isssid" ];then
+#i=$(uci show wireless | grep ]=wifi-iface | tail -n 1 | tr -s "[|]" = |awk -F= '{print $2}')
+i=$(uci show wireless | grep -E "]=wifi-iface|relay=wifi-iface" | wc -l)
+if [ "" == "$i" ];then
+    i=0
+else
+    i=$(($i + 0))
+fi
+uci -q add wireless wifi-iface >/dev/null 2>&1
+uci -q batch<<EOF
+set wireless.@wifi-iface[$i].device=ra0
+set wireless.@wifi-iface[$i].network=lan
+set wireless.@wifi-iface[$i].mode=ap
+set wireless.@wifi-iface[$i].ssid=tozed-zhongji
+set wireless.@wifi-iface[$i].hidden=1
+set wireless.@wifi-iface[$i].encryption=psk+psk2
+set wireless.@wifi-iface[$i].key=tozede3r4t5
+commit wireless
+EOF
+/sbin/wifi >/dev/null 2>&1 &
+fi
+}
+
+start(){
+        set_hidden_ssid
+	sleep 10   #waiting for network interface up
+	service_start /usr/sbin/autorelayserver -i br-lan
+}
+
+stop(){
+	service_stop /usr/sbin/autorelayserver	
+}
+
+restart(){
+        stop
+        start
+}

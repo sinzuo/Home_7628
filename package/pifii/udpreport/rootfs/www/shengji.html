@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;  minimum-scale=1.0; maximum-scale=1.0">
+    <meta http-equiv="keywords" content="爱熊宝客户端">
+    <meta name="description" content="爱熊宝操作说明">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <title>家庭网关—重启路由</title>
+    <style>
+        html,body{  background: -webkit-linear-gradient(#0889D0,#13A0AB,#24C472); /* Safari 5.1 - 6.0 */
+            background: -o-linear-gradient(#0889D0,#13A0AB,#24C472); /* Opera 11.1 - 12.0 */
+            background: -moz-linear-gradient(#0889D0,#13A0AB,#24C472); /* Firefox 3.6 - 15 */
+            background: linear-gradient(#0889D0,#13A0AB,#24C472); /* 标准的语法 */
+        height:100%;}
+
+        header{height:50px;}
+        header .left { background: url("images/register_back.png") no-repeat; background-size:14px 23px; width: 14px; height: 23px; float: left; margin: 13px 0 0px 10px; display: block; }
+        header .txt{font-size: 18px;text-align: center;line-height: 50px;color:#fff;border:1px solid #097CBA;}
+
+
+        .content img{width:100px;height:100px;;display: block;margin:20px auto 20px;}
+        .content .txt_p{margin:10px;color: #fff;line-height: 25px;font-size: 18px;}
+        .content .txt_p span{color: #fff;line-height: 25px;font-size: 18px;}
+        .content .shengjisure{width:160px;border: 1px solid #fff;color:#fff;border-radius: 25px;display: block;margin:20px auto;height:30px;line-height: 30px;font-size: 18px;text-align: center;}
+        /*弹窗*/
+        .tangc{display:none;border-radius: 8px;border:1px solid #e9e9e9;background: #fff;width: 220px;position: fixed;}
+        .tangc .tangc_txt{font-size: 16px;text-align: center;margin:20px 0px;}
+        .tangc .btn_tanc p{font-size: 16px;border-radius: 8px;border:1px solid #e9e9e9;background: #0889D0;width:50px;color:#fff;line-height: 30px;height:30px;display: inline-block;text-align: center;margin-bottom: 20px;}
+        .tangc .btn_tanc p:nth-child(1){margin:0 35px;}
+    </style>
+    <script type="text/javascript" src="js/all.js"></script>
+
+</head>
+<body>
+<header>
+    <span class="left"></span><div class="txt">升级路由器</div>
+</header>
+    <div class="content">
+        <img src="images/chongqi_banner.png">
+        <p class="txt_p">当前固件版本：<span class="current_version">获取中...</span></p>
+        <p class="txt_p">最新固件版本：<span class="new_version"></span></p>
+        <p class="shengjisure" data-clicked="0">升级到最新固件</p>
+    </div>
+<div class="tangc">
+    <p class="tangc_txt">您是否确定升级路由</p>
+    <div class="btn_tanc">
+        <p class="tanc_close">取消</p><p class="tanc_sure" data-clicked="0">确定</p>
+    </div>
+</div>
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<script type="text/javascript" src="js/app_ixbear.js"></script>
+<script>
+
+
+    CheckRefresh();
+    var isFirst = true;
+
+
+    //初始状态
+    var models;
+    function initPageData(refresh){
+        $.ajax({
+            type: "POST",
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/wan_ip_get?token='+token,
+            success: function(data,status){
+                data = JSON.parse(data);
+                models = data;
+
+                //获取当前版本信息
+                if(data.real.curversion == ""){
+                    $(".current_version").text("版本获取中...");
+                }else{
+                    $(".current_version").text(data.real.curversion);
+                    if(VerCmp($(".new_version").html(),$(".current_version").html())<0){
+                        $(".shengjisure").html("已是最新固件");
+                        $(".shengjisure").unbind("click");
+                    }
+                }
+                isFirst = false;
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                //alert("请求失败，稍后请重试！");
+            }
+        });
+        setTimeout(function(){
+            if(!isFirst){
+                isFirst=true;
+                initPageData(true);
+            }
+        },20000);
+    }
+
+    //获取新的版本信息
+    var version;
+    function getNewVersion(){
+        $.ajax({
+            type:"get",//ajax是不支持post方式的跨域
+            url:"http://www.cmttihome.com:9091/wifi_home_gx/open/newFirmwareVersion?model=IJLY_410&factory=CMTT&callback=jsonpcallback",
+            dataType:"jsonp",
+            jsonp:"callback",
+            jsonpCallback:"jsonpcallback",
+            success: function(data){
+                version = data;
+                if(data.swver == ""){
+                    $(".new_version").text("版本获取中...");
+                }else{
+                    $(".new_version").text(data.swver);
+                }
+            },
+            error:function(XMLHttpRequest,textStatus,errorThrown){
+                alert("请求失败，请稍候重试！1");
+            }
+        });
+    }
+    function updateVersion(){
+        $.ajax({
+            type:"POST",
+            url:'http://'+ window.location.host +'/cgi-bin/luci//admin/sys_upgrade',
+            success: function(data){
+                data = JSON.parse(data);
+                console.log(data);
+                $(".current_version").text("版本升级中...");
+                var i = 0;
+                var waitTime = setInterval(function(){
+                    i++;
+                    if(i >= 100){
+                        clearInterval(waitTime);
+                        var loginUrl ="http://" + window.location.host + "/login.html?sj="+Math.random();
+                        window.open(loginUrl,"_self");
+                    }
+                    var rebootText = "版本升级中... " + i + "s"
+                    $(".current_version").text(rebootText);
+                },1000);
+                if(data.status == 1){
+                    alert("版本升级成功！");
+                    $(".current_version").text(version.swver);
+                    return;
+                }else if(data.status == 2){
+                    alert("系统出错，没找到指定版本资源文件！");
+                    //$(".current_version").text(version.curversion);
+                    return;
+                }else if(data.status == 3){
+                    alert("请求版本资源文件失败！");
+                    //$(".current_version").text(version.curversion);
+                    return;
+                }else if(data.status == 4){
+                    alert("版本升级出错，请重新升级！");
+                    //$(".current_version").text(version.curversion);
+                    return;
+                }
+            },
+            error:function(XMLHttpRequest,textStatus,errorThrown){
+                alert("请求失败，请稍候重试！2");
+            }
+        });
+    }
+    $(function(){
+        $(".left").click(function(){
+            location.href="xitong_gl.html?token="+token+"&sj="+Math.random();
+        });
+        getNewVersion()
+        initPageData(true);
+        //升级新版本
+        $(".shengjisure").click(function(){
+            var body_W=window.screen.width;
+            var body_H=window.screen.height;
+            $(".tangc").css({"top":(body_H-115)/2 + "px","left":(body_W-222)/2-4,"position":"fixed"});
+            $(".tangc").show();
+
+        });
+
+        $(".content .sure").click(function(){
+            var body_W=window.screen.width;
+            var body_H=window.screen.height;
+            $(".tangc").css({"top":(body_H-115)/2 + "px","left":(body_W-222)/2-4,"position":"fixed"});
+            $(".tangc").show();
+        });
+        $(".tanc_sure").click(function(){
+            if($(this).attr("data-clicked") == "0"){
+                if(version.newversion == ""){
+                    return false;
+                }else if(version.newversion == models.real.curversion){
+                    alert("当前版本是最新的");
+                    return false;
+                }else if(version.newversion != models.real.curversion){
+                    $(".tangc").hide();
+
+                    updateVersion();
+                    $(this).attr("data-clicked","1");
+                }
+            }else{
+                return false;
+            }
+        })
+        $(".tanc_close").click(function(){
+            $(".tangc").hide();
+        });
+
+    })
+    function VerCmp(verstr1, verstr2)
+    {
+        var subvers1 = verstr1.split(".", 4);
+        var subvers2 = verstr2.split(".", 4);
+        subvers1[0] = subvers1[0].replace(/v/, "");
+        subvers2[0] = subvers2[0].replace(/v/, "");
+        for(var i = 0; i < subvers1.length && i < subvers2.length; i++)
+        {
+            if((0 + subvers1[i]) > (0 + subvers2[i]))
+                return 1;
+            else if((0 + subvers1[i]) < (0 + subvers2[i]))
+                return -1;
+        }
+        if(subvers1.length > subvers2.length)
+            return 1;
+        else if(subvers1.length < subvers2.length)
+            return -1;
+        else
+            return 0;
+    }
+</script>
+</body>
+</html>

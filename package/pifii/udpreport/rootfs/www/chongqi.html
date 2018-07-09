@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;  minimum-scale=1.0; maximum-scale=1.0">
+    <meta http-equiv="keywords" content="爱熊宝客户端">
+    <meta name="description" content="爱熊宝操作说明">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <script type="text/javascript" src="js/all.js"></script>
+    <title>家庭网关—重启路由</title>
+    <style>
+        html,body{  background: -webkit-linear-gradient(#0889D0,#13A0AB,#24C472); /* Safari 5.1 - 6.0 */
+            background: -o-linear-gradient(#0889D0,#13A0AB,#24C472); /* Opera 11.1 - 12.0 */
+            background: -moz-linear-gradient(#0889D0,#13A0AB,#24C472); /* Firefox 3.6 - 15 */
+            background: linear-gradient(#0889D0,#13A0AB,#24C472); /* 标准的语法 */
+        height:100%;}
+
+        header{height:50px;}
+        header .left { background: url("images/register_back.png") no-repeat; background-size:14px 23px; width: 14px; height: 23px; float: left; margin: 13px 0 0px 10px; display: block; }
+        header .txt{font-size: 18px;text-align: center;line-height: 50px;color:#fff;border:1px solid #097CBA;}
+
+
+        .content img{width:100px;height:100px;;display: block;margin:20px auto 20px;}
+        .content .txt_p{margin:10px;color: #fff;line-height: 25px;font-size: 18px;}
+        .content .sure{width:240px;border: 1px solid #fff;color:#fff;border-radius: 8px;display: block;margin:20px auto;height:30px;line-height: 30px;font-size: 18px;text-align: center;}
+        /*弹窗*/
+        .tangc{display:none;border-radius: 8px;border:1px solid #e9e9e9;background: #fff;width: 220px;position: fixed;}
+        .tangc .tangc_txt{font-size: 16px;text-align: center;margin:20px 0px;}
+        .tangc .btn_tanc p{font-size: 16px;border-radius: 8px;border:1px solid #e9e9e9;background: #0889D0;width:50px;color:#fff;line-height: 30px;height:30px;display: inline-block;text-align: center;margin-bottom: 20px;}
+        .tangc .btn_tanc p:nth-child(1){margin:0 35px;}
+    </style>
+</head>
+<body>
+<header>
+    <span class="left"></span><div class="txt">重启路由器</div>
+</header>
+    <div class="content">
+        <img src="images/chongqi_banner.png">
+        <p class="txt_p">1.重启后将会中断当前所有连接，需要约1分钟才能恢复</p>
+        <p class="txt_p">2.重启后可能需要手工连接wifi</p>
+        <p class="sure" data-clicked="0">确认重启</p>
+    </div>
+<div class="tangc">
+    <p class="tangc_txt">您是否确定重启路由</p>
+    <div class="btn_tanc">
+        <p class="tanc_close">取消</p><p class="tanc_sure" data-clicked="0">确定</p>
+    </div>
+</div>
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<script type="text/javascript" src="js/app_ixbear.js"></script>
+
+<script>
+
+
+
+    $(function(){
+        CheckRefresh();
+        $(".left").click(function(){
+            location.href="xitong_gl.html?token="+token+"&sj="+Math.random();
+        });
+        //重启路由器
+        $(".content .sure").click(function(){
+            var body_W=window.screen.width;
+            var body_H=window.screen.height;
+            $(".tangc").css({"top":(body_H-115)/2 + "px","left":(body_W-222)/2-4,"position":"fixed"});
+            $(".tangc").show();
+        });
+        $(".tanc_sure").click(function(){
+            if($(this).attr("data-clicked") == "0"){
+                $(".tangc").hide();
+                reboot();
+                $(this).attr("data-clicked","1");
+            }else{
+                return false;
+            }
+        })
+        $(".tanc_close").click(function(){
+            $(".tangc").hide();
+        });
+
+    })
+    //重启路由
+    function reboot(){
+        $.ajax({
+            type:"POST",
+            url:'http://'+ window.location.host +'/cgi-bin/luci//admin/sys_reboot',
+            success: function(data){
+                $(".content .sure").text("正在重启中...");
+                var i = 0;
+                var waitTime = setInterval(function(){
+                    i++;
+                    if(i >= 90){
+                        clearInterval(waitTime);
+                        $(".content .sure").text("路由器已重启");
+                        var loginUrl ="http://" + window.location.host + "/login.html?sj="+Math.random();
+                        window.open(loginUrl,"_self");
+                    }
+                    var rebootText = "正在重启中... " + i + "s";
+                    $(".content .sure").text(rebootText);
+                },1000);
+            },
+            error:function(XMLHttpRequest,textStatus,errorThrown){
+                alert("请求失败，请稍候重试！4");
+            }
+        });
+    }
+</script>
+</body>
+</html>

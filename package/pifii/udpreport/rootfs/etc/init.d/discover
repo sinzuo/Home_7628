@@ -1,0 +1,13 @@
+#!/bin/sh /etc/rc.common
+START=93
+EXTRA_COMMANDS=""
+
+start () {
+        /usr/sbin/discover&
+}
+
+stop () {
+        service_stop /usr/sbin/discover
+}
+
+

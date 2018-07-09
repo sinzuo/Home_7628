@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>家庭路由-登录</title>
+		<meta http-equiv=“X-UA-Compatible” content="IE=8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" /> 
+        <meta name="keywords" content="i熊宝" />
+        <meta name="description" content="i熊宝" />
+		<meta http-equiv="Expires" content="0">
+		<meta http-equiv="Pragma" content="no-cache">
+		<meta http-equiv="Cache-control" content="no-cache">
+		<meta http-equiv="Cache" content="no-cache">
+        <link rel="stylesheet" type="text/css" href="css/common.css" />
+        <link rel="stylesheet" type="text/css" href="css/ixbear.css" />
+		<link rel="shortcut icon" type="image/x-icon" href="images/logo.png" />
+        <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="js/jquery.cookie.js"></script>
+        <script type="text/javascript" src="js/ixbear.js"></script>
+	</head>
+	<body>
+    	<div class="wrapper">
+			<div class="inner">
+				<!--<div class="logo">
+                    <img src="images/logo.png">
+                </div>-->
+				<form action="" method="post" name="login" id="up_from">
+                <div class="login_box">
+                	<div class="text_input">
+                            <span>密码：</span>
+                            <input type="password" placeholder="输入密码" maxlength="30"  name="pass">
+                    </div>
+                    <input type="button" class="login_btn" value="登 录" />
+                </div>
+				</form>
+            </div>       
+        </div>
+		<script type="text/javascript">
+
+
+		</script>
+        <script type="text/javascript">
+		var xmlhttp;
+        	$(document).ready(function() {
+				browserRedirect();
+				resizeScreen();
+				$(window).resize(function(){
+					resizeScreen();
+				});
+				//enter键盘事件
+				$(this).keydown(function (){
+					if (event.keyCode == 13)
+					{
+						event.returnValue=false;
+						event.cancel = true;
+						$(".login_btn").click();
+					}
+				})
+				//点击登录
+				$(".login_btn").click(function(){
+					var pwdVal = $(".text_input input").val();
+					if(pwdVal == ""){
+						alert("密码不能为空！");
+						return false;
+					}else if(pwdVal.length < 8){
+						alert("密码不能小于8位！")
+						return false;
+					}
+					routeLogin(pwdVal);
+				});
+			});
+			
+			//获取url参数值
+			function getQueryStringByName(name){
+				var result = location.search.match(new RegExp("[\?\&]" + name+ "=([^\&]+)","i"));
+				if(result == null || result.length < 1){
+					return "";
+				}
+				return result[1];
+			}
+
+
+			function routeLogin(pwd){
+				/*$.ajax({
+					type: "post",
+					url: 'http://'+window.location.host+'/cgi-bin/luci/admin/login_in',
+					data:{pass:pwd},
+					success: function(data,status){
+						console.log(data);
+						if(data.token !="" &&data.status != 101){
+							setTimeout(function(){
+								gotoIndex(data.token);
+							},1000);
+						}else{
+							alert("密码错误！");
+						}
+					},
+					error: function(jqXHR, textStatus,errorThrown,data){
+						alert("请求失败，稍后请重试！");
+					}
+				});*/
+			
+				if (window.XMLHttpRequest)
+				{// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+				}
+				else
+				{// code for IE6, IE5
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				xmlhttp.onreadystatechange=function()
+				{
+					if (xmlhttp.readyState==4 && xmlhttp.status==200)
+					{
+						
+						//alert(xmlhttp.responseText);
+						var data= JSON.parse(xmlhttp.responseText);
+						if(data.token !="" &&data.status != 101){
+							setTimeout(function(){
+								gotoIndex(data.token);
+							},1000);
+						}else{
+							alert("密码错误！");
+						}
+					}
+				}
+				xmlhttp.open("GET",'http://'+window.location.host+'/cgi-bin/luci/admin/login_in?pass='+pwd,true);
+				xmlhttp.send();
+			}
+
+			function resizeScreen(){
+				var w = $(window).width();
+				var h = $(window).height();
+				$(".wrapper").css({"width":w + "px","height":h + "px"});
+			}
+			function browserRedirect() {
+				var sUserAgent= navigator.userAgent.toLowerCase();
+				var bIsIpad= sUserAgent.match(/ipad/i) == "ipad";
+				var bIsIphoneOs= sUserAgent.match(/iphone os/i) == "iphone os";
+				var bIsMidp= sUserAgent.match(/midp/i) == "midp";
+				var bIsUc7= sUserAgent.match(/rv:1.2.3.4/i) == "rv:1.2.3.4";
+				var bIsUc= sUserAgent.match(/ucweb/i) == "ucweb";
+				var bIsAndroid= sUserAgent.match(/android/i) == "android";
+				var bIsCE= sUserAgent.match(/windows ce/i) == "windows ce";
+				var bIsWM= sUserAgent.match(/windows mobile/i) == "windows mobile";
+
+				var hrefw=window.location.href;
+				if (bIsIpad || bIsIphoneOs || bIsMidp || bIsUc7 || bIsUc || bIsAndroid || bIsCE || bIsWM) {
+						window.location.href= 'app_lg.html?sj='+Math.random();
+				} else {
+					if(hrefw.indexOf("login") ==-1){
+						window.location.href= 'login.html?&sj='+Math.random();
+					}
+				}
+			}
+        </script>
+	</body>   
+</html>

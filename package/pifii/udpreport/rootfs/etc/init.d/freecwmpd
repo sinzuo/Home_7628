@@ -1,0 +1,46 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2012 OpenWrt.org
+
+START=90
+
+start() {
+#	local PART="$(grep "config_data" /proc/mtd | awk -F: '{print $1}')"
+#	local PREFIX=/dev/mtdblock
+
+#	PART="${PART##mtd}"
+#	[ -d /dev/mtdblock ] && PREFIX=/dev/mtdblock/
+#	config_data="${PART:+$PREFIX$PART}"
+
+#	if !  grep -q $config_data /proc/mounts ; then
+#		mount -t jffs2 $config_data /conf
+#		mount_hook="$(mount | grep $config_data | awk '{print $3}')"
+#		ln -sf $mount_hook/device /etc/config/device_custom
+#		sleep 3
+#	fi
+    local freecwmp_enable=$(uci -q get freecwmp.@local[0].freecwmp_enable )
+    if test -z "$freecwmp_enable"
+        then
+         freecwmp_enable=1
+    fi                                                                     
+    if [ $freecwmp_enable -eq 0 ]; then
+          stop
+    else
+	uci set freecwmp.@device[0].serial_number=`dd bs=1 skip=4 count=6 if=/dev/mtdblock2 2>/dev/null | hexdump -vC|grep 00000000|awk '{print toupper($2$3$4$5$6$7)}'`
+	uci commit freecwmp.@device[0].serial_number  
+    uci set freecwmp.@device[0].software_version=`cat /etc/sysinfo.conf | grep soft_version | cut -d '=' -f2 2> /dev/null`
+	uci commit freecwmp.@device[0].software_version
+    sed -i '/:3:respawn:\/usr\/sbin\/freecwmpd -f/d' /etc/inittab
+    sed -i '/:23:respawn:\/usr\/sbin\/freecwmpd -f/d' /etc/inittab
+	if pgrep freecwmpd >/dev/null 2>&1;then
+	   echo "ok" > /dev/null
+	else
+	   /usr/sbin/freecwmpd
+	fi   
+    fi
+}
+
+stop() {
+        sed -i '/:3:respawn:\/usr\/sbin\/freecwmpd -f/d' /etc/inittab
+        kill -1 1                                       
+        service_stop /usr/sbin/freecwmpd 
+}

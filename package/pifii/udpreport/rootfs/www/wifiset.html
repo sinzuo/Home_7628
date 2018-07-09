@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;  minimum-scale=1.0; maximum-scale=1.0">
+    <meta http-equiv="keywords" content="爱熊宝客户端">
+    <meta name="description" content="爱熊宝操作说明">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <title>家庭网关—无线连接</title>
+    <style>
+        html,body{  background: -webkit-linear-gradient(#0889D0,#13A0AB,#24C472); /* Safari 5.1 - 6.0 */
+            background: -o-linear-gradient(#0889D0,#13A0AB,#24C472); /* Opera 11.1 - 12.0 */
+            background: -moz-linear-gradient(#0889D0,#13A0AB,#24C472); /* Firefox 3.6 - 15 */
+            background: linear-gradient(#0889D0,#13A0AB,#24C472); /* 标准的语法 */
+        height:100%;}
+
+        header{height:50px;}
+        header .left { background: url("images/register_back.png") no-repeat; background-size:14px 23px; width: 14px; height: 23px; float: left; margin: 13px 0 0px 10px; display: block; }
+        header .txt{font-size: 18px;text-align: center;line-height: 50px;color:#fff;border:1px solid #097CBA;}
+
+        .content form div{height:70px;}
+        .content form  .wifiset_name{width: 300px; margin: 0 auto; display: block;}
+        .content form  .pwd{width: 300px; margin: 0 auto; display: block;}
+        .content form div .namespan{width:75px;line-height: 70px;display: inline-block;color:#fff;font-size: 16px;margin-left: 10px;}
+        .content form div input{margin: 35px auto; background: none; border: 1px solid #08D6F5; font-size: 16px; padding-left: 10px; color: #08D6F5; height: 40px; width: 150px;    background: #fff;}
+        .content .wifi_confirm{width:240px;border: 1px solid #fff;color:#fff;border-radius: 8px;display: block;margin:60px auto;height:30px;line-height: 30px;font-size: 18px;text-align: center;}
+        .wifiset_name select{background: none; border: none; color: #fff; width: 220px;}
+        .wifiset_name select option{background: none;color: #333;  }
+        .wifi_reload{float: right; margin: -38px 10px 0px 0px;}
+        .select_wifi { display: inline-block; position: relative; cursor: pointer; }
+        .content form div.select_wifi span { display: inline-block; width: 150px; height: 40px; line-height: 40px; color: #7c7c7c; font-size: 16px;padding-left:10px;vertical-align: middle;-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; }
+        .select_wifi span { background: url(images/bg8.png) no-repeat 95% center; background-color: #fff; -webkit-background-size: 15px auto; -moz-background-size: 15px auto; background-size: 15px auto; }
+        .get_wifiList { position: absolute; left: 0; top: 40px; width: 160px; height: 150px; overflow-y: scroll; border: 1px solid #ccc; background: #fff; z-index: 10; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; display: none;}
+        .get_wifiList dd{display: block; line-height: 30px; font-size: 14px;text-align: center;}
+
+    </style>
+    <script type="text/javascript" src="js/all.js"></script>
+
+</head>
+<body>
+<header>
+    <span class="left"></span><div class="txt">无线连接</div><a class="wifi_reload" href="javascript:void(0)"><img src="images/wifi_reload.png" style="width:20px;"></a>
+</header>
+    <div class="content">
+        <form action="" method="post" name="login">
+            <div class="wifiset_name">
+                <span class="namespan">wifi名称：</span>
+                <div class="select_wifi">
+                    <span></span>
+                    <dl class="get_wifiList">
+                    </dl>
+                </div>
+            </div>
+            <div class="pwd">
+                <span class="namespan">wifi密码：</span>
+                <input type="text" name="wideNetworkPwd" placeholder="请输入密码" maxlength="30" class="wideNetworkPwd" id="qwe1">
+                <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 45px 5px 0px 15px; color: #fff;">
+                    <img src="images/btn_eye_on.png" style="width:20px;"/>
+                </a>
+            </div>
+        </form>
+        <p class="wifi_confirm">确认</p>
+    </div>
+
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<script type="text/javascript" src="js/app_ixbear.js"></script>
+<script>
+    initPageData(true);
+    //初始状态
+    var models;
+    function initPageData(refresh){
+        $.ajax({
+            type: "POST",
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/wan_ip_get?token='+token,
+            success: function(data,status){
+                data = JSON.parse(data);
+                models = data;
+                $(".select_wifi span").first().text(data.wifi.ssid);
+                $(".select_wifi span").first().data("encryption",data.wifi.encryption);
+                if(data.wifi.encryption==0){
+                    $(".pwd").hide();
+                }
+
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                //alert("请求失败，稍后请重试！");
+            }
+        });
+        setTimeout(function(){
+            if(!isFirst){
+                isFirst=true;
+                initPageData(true);
+            }
+        },20000);
+    }
+    $(function(){
+        CheckRefresh();
+        $(".pwd_btn").bind('click',function(){
+            var _this=$(this);
+            var imgs=$(this).find("img");
+            if(imgs.attr("src").indexOf("off")>-1){
+                imgs.attr("src","images/btn_eye_on.png");
+                var thisid=_this.prev().attr("id");
+                var wifiPwd=document.getElementById(thisid);
+                wifiPwd.type="text";
+            }else{
+                imgs.attr("src","images/btn_eye_off.png");
+                var thisid=_this.prev().attr("id");
+                var wifiPwd=document.getElementById(thisid);
+                wifiPwd.type="password";
+            }
+        })
+        $(".left").click(function(){
+            location.href="link_setting.html?token="+token+"&sj="+Math.random();
+        });
+
+        $.ajax({
+            type: "POST",
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/wan_ip_get?token='+token,
+            success: function(data,status){
+		        data = JSON.parse(data);
+                models = data;
+                $(".select_wifi span").text(models.wifi.ssid);
+                $(".pwd input").val(models.wifi.key);
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                //alert("请求失败，稍后请重试！");
+            }
+        });
+        getWiFiList();
+        $(".wifi_reload").click(function(){
+            getWiFiList();
+        });
+
+        $(".wifi_confirm").click(function(){
+            var url = 'http://'+window.location.host+'/cgi-bin/luci/admin/wan_ip_set?token='+token;
+            var data;
+            var selectedWifi = $(".select_wifi span").first();
+            var ssid = selectedWifi.text();
+            var encryption = selectedWifi.data("encryption");
+            var key = $(".pwd input").val();
+            url = 'http://'+window.location.host+'/cgi-bin/luci/admin/wan_relay_set?token='+token;
+            if(encryption==0){
+                data = {ssid:ssid};
+            }else{
+                if ( key.length < 8)
+                {
+                    alert('请输入密码大于等于8个字符');
+                    $(".pwd input").focus();
+                    return;
+                }
+
+                data = {ssid:ssid,key:key};
+            }
+
+
+            var dd=$(".get_wifiList dd");
+            var wifinum=0;
+            $.each(dd,function(){
+                if($(this).html()==$(".select_wifi span").html()){
+                    wifinum=1;
+                }
+            })
+            if(wifinum != 1){
+                alert("设置失败，wifi名称没有搜索到，请重新刷新！");
+                $(".select_wifi").focus();
+                return false;
+            }
+
+
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: url,
+                data:data,
+                success: function(data,status){
+                    alert("设置配置成功！");
+                    $(".confirm").unbind("click");
+                    initPageData(false);
+                    setTimeout(function(){
+                        location.href="phone.html?token="+token+"&sj="+Math.random();
+                    },5000);
+
+                },
+                error: function(jqXHR, textStatus,errorThrown){
+                    alert("设置网络失败，请稍后重试！");
+                }
+            });
+        });
+
+        //获取wifi
+        $(".select_wifi span").hover(function(){
+            $(this).parent().find('.get_wifiList').slideDown(100);  //找到dl.get_onlineStyle显示
+            $(this).parent().find('dd').hover(function(){$(this).addClass('hover')},function(){$(this).removeClass('hover')}); //li的hover效果
+            $(this).parent().hover(function(){},function(){
+                $(this).parent().find(".get_wifiList").slideUp(100);
+            });
+        },function(){});
+    })
+    //获取WiFi列表
+    function getWiFiList(){
+        $.ajax({
+            type: "POST",
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/wifi_scan_get?token='+token,
+            success: function(data,status){
+                data=JSON.parse(data);
+                $(".get_wifiList").html("");
+                var wifiListHtml = "";
+                for(var i=0;i<data.length;i++){
+                    wifiListHtml += "<dd data-encryption='"+data[i].encryption+"'>"+data[i].ssid+"</dd>";
+                }
+                $(".get_wifiList").html(wifiListHtml);
+                $(".get_wifiList dd").click(function(){
+                    if($(this).html() != $(this).parents('.select_wifi').find('span').html()){
+                        $(".pwd input").val("");
+                        if($(this).html() == models.wifi.ssid){
+                            $(".pwd input").val(models.wifi.key);
+                        }
+                        $(this).parents('.select_wifi').find('span').html($(this).html());
+                        $(this).parents('.select_wifi').find('span').data("encryption",$(this).data("encryption"));
+                        if($(this).data("encryption")==0){
+                            $(".pwd").hide();
+                        }else{
+                            $(".pwd").show();
+                        }
+                        $(this).parents('.select_wifi').find('dl').slideUp();
+
+                    }
+                });
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                //alert("获取wifi列表失败，请稍后重试！");
+            }
+        });
+    }
+</script>
+</body>
+</html>

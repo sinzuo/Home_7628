@@ -1,0 +1,573 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,  minimum-scale=1.0, maximum-scale=1.0">
+    <meta http-equiv="keywords" content="爱熊宝客户端">
+    <meta name="description" content="爱熊宝操作说明">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <title>家庭网关</title>
+    <script type="text/javascript" src="js/all.js"></script>
+
+    <style>
+        body{  background: -webkit-linear-gradient(#0889D0,#13A0AB,#24C472); /* Safari 5.1 - 6.0 */
+            background: -o-linear-gradient(#0889D0,#13A0AB,#24C472); /* Opera 11.1 - 12.0 */
+            background: -moz-linear-gradient(#0889D0,#13A0AB,#24C472); /* Firefox 3.6 - 15 */
+            background: linear-gradient(#0889D0,#13A0AB,#24C472); /* 标准的语法 */
+
+        }
+        header{height:50px;}
+        .header_right{float:right;color:#fff;font-size: 15px;line-height: 50px;margin-right:15px;}
+        .header_right span{background: url("images/close.png") no-repeat;background-size: 20px 20px;width:20px;height:20px;display: inline-block;position: relative;top:3px;margin-right: 10px;}
+
+        .content{margin-top:20px;height:370px;border-bottom: 2px solid #109BB4;padding-bottom: 20px;}
+        .content .show_left{margin-top: 100px;width:50%;display: inline-block;float: left;}
+        .content .show_left .show_num{text-align: center;font-size: 20px;color:#015493;}
+        .content .show_left .show_num span{font-size: 50px;color:#fff;}
+        .content .show_left .show_txt{margin: 20px auto; width: 130px;display: block;}
+        .content .show_left .show_txt img{width:30px;height:20px;float: left;}
+        .content .show_left .show_txt p{font-size: 18px;color:#015493;margin-left: 40px;}
+        .content .show_right{float:right;width:45%;margin-right:5%;background: rgba(105, 186, 218, 0.5);border-radius: 5px;}
+        .content .show_right div{border-bottom: 1px solid #109BB4;}
+        .content .show_right div p:nth-child(1){color:#015493;font-size: 16px;padding: 15px 10px 0;}
+        .content .show_right div p:nth-child(2){color:#C3E6FF;height: 40px; font-size: 15px; padding: 5px 5px 5px 10px;}
+
+        .foot{ overflow: hidden;}
+        .foot div{width:50%;float: left;display: inline-block;text-align: center;}
+        .foot div img{width:60px;height:50px;margin-top:20px;}
+        .foot div p{margin-top: 10px;color:#fff;font-size: 18px;margin-bottom: 20px;}
+
+        /*修改密码*/
+         .change_pwd{position:absolute;top:50%;width:320px;padding:20px 0;opacity:0.8;filter:alpha(opacity=80);background:#0873a6;background:rgba(8,115,166,0.8) !important;z-index:101;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;display:none;}
+         .change_pwd ul li{margin:0 auto;padding:10px 0;}
+         .change_pwd ul li label{display:inline-block;width:125px;color:#fff;font-size:16px;text-align:right;}
+         .change_pwd ul li input{width:175px;padding:12px 0;border:0 none;background:#fff;text-indent:10px;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;box-sizing:border-box;}
+         .change_pwd ul li:nth-of-type(2){position:relative;}
+         .change_pwd ul li:nth-of-type(4), .change_pwd ul li:nth-of-type(5){display:none;}
+         .change_pwd ul li span{position:absolute;right:-110px;top:50%;margin-top:-15px;height:30px;line-height:30px;padding:0 10px;font-size:14px;color:#fff;border:1px solid #fff;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;cursor:pointer;}
+         .change_pwd ul li span:hover{background:#fff;color:#0392d8;}
+         .change_pwd ul li input:focus{-webkit-box-shadow:0px 0px 5px #CCC;-moz-box-shadow:0px 0px 5px #CCC;box-shadow:0px 0px 5px #CCC;}
+         .change_pwd .btn:after{ content:""; display:block; height:0; visibility:hidden; clear:both; }
+         .change_pwd .btn .closed{float:left;margin-left: 47px;margin-top:20px;cursor:pointer;}
+         .change_pwd .btn .closed p{width:80px;padding:5px 0;margin-left:10px;border:1px solid #fff;font-size:16px;color:#fff;text-align:center;background:none;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;}
+         .change_pwd .btn .confirmation{margin: 0 auto; margin-top: 20px; cursor: pointer; display: inline-block; margin-left: 50px;}
+         .change_pwd .btn .confirmation p{width:80px;padding:5px 0;border:1px solid #fff;font-size:16px;color:#fff;text-align:center;background:none;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;}
+         .change_pwd .btn .closed p:hover{background:#fff;color:#0392d8;}
+         .change_pwd .btn .confirmation p:hover{background:#fff;color:#0392d8;}
+
+         
+        /*修改名称*/
+         .change_wifiName{position:absolute;top:50%;width:300px;padding:20px 0;filter:alpha(opacity=80);background:#0873a6;background:rgba(8,115,166,0.8) !important;z-index:101;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;display:none;}
+         .change_wifiName ul li{margin:0 auto;padding:10px 0;}
+         .change_wifiName ul li label{display:inline-block;width:90px;color:#fff;font-size:16px;text-align:right;}
+         .change_wifiName ul li input{width:165px;padding:12px 0;border:0 none;background:#fff;text-indent:10px;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;box-sizing:border-box;}
+         .change_wifiName ul li input[type=checkbox]{width: 15px;}
+         .change_wifiName ul li input:focus{-webkit-box-shadow:0px 0px 5px #CCC;-moz-box-shadow:0px 0px 5px #CCC;box-shadow:0px 0px 5px #CCC;}
+         .change_wifiName .btn{width:350px;margin:0 auto;}
+         .change_wifiName .btn:after{ content:""; display:block; height:0; visibility:hidden; clear:both; }
+         .change_wifiName .btn .closed{float:left;width:150px;margin:0 auto;margin-top:20px;cursor:pointer;}
+         .change_wifiName .btn .closed p{margin-left:40px;width:80px;padding:5px 0;border:1px solid #fff;font-size:16px;color:#fff;text-align:center;background:none;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;}
+         .change_wifiName .btn .confirmation{margin-left: 14px; display: inline-block;margin-top:20px;}
+         .change_wifiName .btn .confirmation p{width:80px;padding:5px 0;border:1px solid #fff;font-size:16px;color:#fff;text-align:center;background:none;-webkit-border-radius:5px;-moz-border-radius:5px;border-radius:5px;}
+         .change_wifiName .btn .closed p:hover{background:#fff;color:#0392d8;}{background:#fff;color:#0392d8;}
+         .change_wifiName .btn .confirmation p:hover{background:#fff;color:#0392d8;}{background:#fff;color:#0392d8;}
+
+            @media only screen and (min-height:710px) {
+                html,body{height:100%;
+                    position:relative;}
+            }
+        #set_pass{height: 40px; border-radius: 8px; line-height: 40px; width: 90px;}
+    </style>
+</head>
+<body>
+<header>
+    <p class="header_right exit"><span></span>退出</p>
+</header>
+<iframe id="register_iframe" src="" width="0px" height="0px" frameborder="0" scrolling="no"></iframe>
+<div class="content">
+    <div class="show_left">
+        <div class="show_num"><span id="app_num">0</span>台</div>
+        <div class="show_txt">
+            <img src="images/pc_icon2.png">
+            <p>设备连接数</p>
+        </div>
+    </div>
+    <div class="show_right">
+        <div class="link">
+            <p>当前连接方式：</p>
+            <p id="connectWay">数据获取中...</p>
+        </div>
+        <div class="IP">
+            <p>IP地址：</p>
+            <p id="idAddress">连接重试中...</p>
+        </div>
+        <div class="link_name">
+            <p>无线连接名称：</p>
+            <p id="wirelessName"></p>
+        </div>
+        <div class="link_num">
+            <p>设备连接数</p>
+            <p id="wirelessNum"></p>
+        </div>
+    </div>
+</div>
+<div class="foot">
+    <div class="link_set">
+        <img src="images/link_setting.png">
+        <p>网络设置</p>
+    </div>
+    <div class="xitong_set">
+        <img src="images/window_gl.png">
+        <p>系统管理</p>
+    </div>
+    <div class="wuxian_set">
+        <img src="images/wuxian_setting.png">
+        <p>无线设置</p>
+    </div>
+    <div class="psd_set">
+        <img src="images/set_psd.png">
+        <p>修改密码</p>
+    </div>
+</div>
+
+<div class="change_pwd layui-anim">
+    <ul>
+        <li>
+            <label>原密码：</label>
+            <input type="password" placeholder="请输入原登录密码" name="pwdVal_old" maxlength="30">
+        </li>
+        <li>
+            <label>登录密码：</label>
+            <input type="password" placeholder="请输入新的登录密码" name="pwdVal1" maxlength="30">
+        </li>
+        <li>
+            <label>确认登录密码：</label>
+            <input type="password" placeholder="再次输入登录密码" name="pwdVal2" maxlength="30">
+        </li>
+        <li id="first_input">
+            <label>WiFi密码：</label>
+            <input type="password" placeholder="请输入新的WiFi密码" name="pwdVal3" maxlength="30">
+        </li>
+        <li id="second_input">
+            <label>确认WiFi密码：</label>
+            <input type="password" placeholder="再次输入WiFi密码" name="pwdVal4" maxlength="30">
+        </li>
+    </ul>
+    <div class="btn">
+        <div class="closed">
+            <p>关闭</p>
+        </div>
+        <div class="confirmation setPwdVal">
+            <p>确定</p>
+        </div>
+    </div>
+</div>
+<div class="change_wifiName layui-anim">
+    <ul>
+        <li>
+            <label>wifi名称：</label>
+            <input type="text" placeholder="WiFi名称" name="wifiName1" maxlength="20">
+        </li>
+        <li>
+            <label>wifi密码：</label>
+            <select id="set_pass">
+                <option value = "pass_null">无密码</option>
+                <option value = "pass_set">设置密码</option>
+            </select>
+        </li>
+        <li>
+            <label>隐藏ssid：</label>
+            <input type="checkbox" name="hiddenssid" value="1"><span style="color: #fff;font-size: 14px; top: -2px; display: inline-block; position: relative;">隐藏</span>
+        </li>
+        <li id="show_setpass">
+            <label>设置密码：</label>
+            <input type="text" placeholder="请输入新的WiFi密码" name="wifi_pass" maxlength="20" id="wifi_pass">
+            <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                <img src="images/btn_eye_off.png" style="width:20px;"/>
+            </a>
+        </li>
+    </ul>
+    <div class="btn">
+        <div class="closed">
+            <p>关闭</p>
+        </div>
+        <div class="confirmation setWifiName">
+            <p>确定</p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<script type="text/javascript" src="js/app_ixbear.js"></script>
+<script>
+    CheckRefresh();
+    //js document
+    var onlineModels = {'pppoe':'PPPoE拨号','static':'网线（手动配置）','dhcp':'网线（自动配置）','wifi':'无线连接'};//数组生成上网配置方式,'wifi':'无线连接'
+
+    initPageData(true);
+
+    var isFirst = true;
+
+    //初始状态
+    var models;
+    function initPageData(refresh){
+        $.ajax({
+            type: "POST",
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/wan_ip_get?token='+token,
+            success: function(data,status){
+                data = JSON.parse(data);
+                models = data;
+                $("#connectWay").text(onlineModels[data.wantype]);
+                if(data.real.ip == ""){
+                    $("#idAddress").text("连接重试中....");
+                }else{
+                    $("#idAddress").text(data.real.ip+" / "+data.real.mask);
+                    if(data.pppoe.reg == "0"&&data.real.httpreg.trim() == "0" ){
+                        if(isFirst){
+                            $.post("http://"+window.location.host+"/cgi-bin/luci/admin/http_set_register",{});
+                            /*$.ajax({^M
+                             type: "POST",^M
+                             url: 'http://'+window.location.host+'/cgi-bin/luci/admin/http_set_register?',^M
+                             success: function(data1,status1){^M
+                             },
+                             error: function(data1,status1){^M
+                             }
+                             });*/
+                            var pppoe_username = data.pppoe.user;
+                            var regUrl = data.real.regUrl;
+                            var acMac = data.real.mac;
+                            var actUrl = data.real.actUrl;
+                            actUrl=actUrl.replace('activeH','activeM');
+                            var factory= data.real.dHard;
+                            var model= data.real.dName;
+                            document.getElementById("register_iframe").src = "http://117.139.108.10:8888/register.html"+"?t="+Date.parse(new Date())+"&pppoe_username="+pppoe_username+"&acmac=" + acMac + "&ac_active_address=" + actUrl + "&factory=" + factory + "&model=" + model;
+
+                            isFirst = false;
+                        }
+                    }else{
+                        //showInfo("wifi_revise");
+                    }
+                }
+
+                var thisDNS = "";
+                for(var i=0;i<data.real.dns.length;i++){
+                    thisDNS += data.real.dns[i]+",";
+                }
+                if(thisDNS != ""){
+                    thisDNS = thisDNS.substring(0,thisDNS.length-1);
+                }
+                $("#app_num").html(data.real.wifinum);
+                $("#dnsAddress").text(thisDNS);
+                $("#wirelessName").text(data.real.wifiname);
+                $("#wirelessNum").text(data.real.wifinum);
+                $(".connect_num").text(data.real.wifinum);
+                isFirst = false;
+                //获取当前版本信息
+                if(data.real.curversion == ""){
+                    $(".current_version").text("版本获取中...");
+                }else{
+                    $(".current_version").text(data.real.curversion);
+                    $(".new_version").text(data.real.newversion);
+                }
+                if(refresh){
+                    $("#"+data.wantype).click();
+
+                    $(".name input").val(data.pppoe.user);
+                    //$(".pwd input").val(data.pppoe.pass);
+                    //$(".dns input").val(data.pppoe.dns);
+                    //$(".dns input").val(data.dhcp.dns);
+
+                    $(".ip input").val(data.static.ip);
+                    $(".select_mask").val(data.static.mask);
+                    /*		$(".select_mask span").first().text(data.static.mask);
+                     $(".select_mask span").first().data("value",data.static.mask);
+                     $(".select_mask .get_mask dd").each(function(){
+                     if(data.static.mask == $(this).data("value")){
+                     $("select_mask span").first().text($(this).text());
+                     }
+                     });
+                     */
+                    $(".gateway input").val(data.static.gw);
+                    $(".dns input").val(data.static.dns);
+                    $(".select_wifi span").first().text(data.wifi.ssid);
+                    $(".select_wifi span").first().data("encryption",data.wifi.encryption);
+                }
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                //alert("请求失败，稍后请重试！");
+            }
+        });
+        setTimeout(function(){
+            if(!isFirst){
+                isFirst=true;
+                initPageData(true);
+            }
+        },20000);
+    }
+
+    function resizeScreen(){
+        var w = $(window).width();
+        var h = $(window).height();
+        var body_W=window.screen.width;
+        var body_H=window.screen.height;
+        var runH = $(".running_state").outerHeight();
+        var changeH = $(".change_pwd").height();//50为中间值
+        var changew = $(".change_pwd").width();//50为中间值
+        var wifiNameH = $(".change_wifiName").height();
+        var wifiNameW = $(".change_wifiName").width();
+        $(".outer").css({"width":w + "px","height":h + "px"});
+        $(".menu_bar").css({"height":h-80 + "px"});
+        $(".show_content").css({"width":w-130 + "px","height":h-80 + "px"});
+        $(".show_content .content_1").css({"margin-top":(h-80-555)/2 + "px"});
+        $(".show_content .content_2").css({"margin-top":(h-80-400)/2 + "px"});
+        $(".show_content .content_3").css({"margin-top":(h-80-400)/2 + "px"});
+        $(".show_content .content_4").css({"margin-top":(h-80-400)/2 + "px"});
+        $(".running_state").css({"margin-top":-runH/2 + "px"});
+        $(".change_pwd").css({"top":(body_H-changeH-40)/2 + "px","left":(body_W-changew)/2-4,"position":"fixed"});
+        $(" .change_wifiName").css({"top":(body_H-wifiNameH-40)/2 + "px","left":(body_W-wifiNameW)/2-4,"position":"fixed"});
+        $(".tangc").css({"top":(body_H-115)/2 + "px","left":(body_W-222)/2-4,"position":"fixed"});
+        if($(".show_content").height() < 555){
+            $(".content_1_b p").css({"top":"-40px","position":"relative"});
+        }
+    }
+    $(".pwd_btn").bind('click',function(){
+        var _this=$(this);
+        var imgs=$(this).find("img");
+        if(imgs.attr("src").indexOf("off")>-1){
+            imgs.attr("src","images/btn_eye_on.png");
+            var thisid=_this.prev().attr("id");
+            var wifiPwd=document.getElementById(thisid);
+            wifiPwd.type="text";
+        }else{
+            imgs.attr("src","images/btn_eye_off.png");
+            var thisid=_this.prev().attr("id");
+            var wifiPwd=document.getElementById(thisid);
+            wifiPwd.type="password";
+        }
+    })
+    //点击退出
+    $(".exit").click(function(){
+        window.location.replace("app_lg.html?sj="+Math.random(10));
+    });
+    //点击关闭
+    $(".closed").click(function(){
+        $(this).parent().parent().hide();
+        //$(".transparent").hide();
+    });
+    $(".closed_state").click(function(){
+        $(this).parent().hide();
+        //$(".transparent").hide();
+    });
+    //点击网络设置
+    $(".link_set").click(function(){
+        window.location.href="link_setting.html?token="+token+"&sj="+Math.random();
+    });
+
+    //系统管理
+    $(".xitong_set").click(function(){
+        location.href="xitong_gl.html?token="+token+"&sj="+Math.random();
+    });
+
+    //无线设置
+    $(".wuxian_set").click(function(){
+        $(".change_wifiName").show();
+        getWifiName();
+    });
+
+    //修改密码
+    $(".psd_set").click(function(){
+        $(".change_pwd").show();
+    });
+
+    //设置有无密码
+    $('#set_pass').change(function(){
+        var p=$(this).children('option:selected').val();
+        if(p=="pass_null"){
+            $("#show_setpass").hide();
+        }else if(p=="pass_set"){
+            $("#show_setpass").show();
+        }
+    })
+    //设置名称
+    $(".setWifiName p").click(function(){
+        var wifiNameStr1 = $("input[name='wifiName1']").val();
+        var wifi_pass = $("input[name='wifi_pass']").val();
+        var hidden;
+        if($("input[name='hiddenssid']").is(":checked")){
+            hidden=1;
+        }else{
+            hidden=0;
+        }
+
+        var pass="";
+        if(wifiNameStr1 == ""){
+            alert("请输入WiFi名称！");
+            return false;
+        }
+        if(wifi_pass !="" && wifi_pass.length <=7){
+            alert("密码不少于8位！");
+            $("input[name='wifi_pass']").focus();
+            return;
+        }
+
+        if($('#set_pass').children('option:selected').val()=="pass_null"){
+            pass="N/A";
+        }else{
+        	if(wifi_pass.length <=7){
+            		alert("密码不少于8位！");
+            		$("input[name='wifi_pass']").focus();
+            		return;
+        	}
+            pass=wifi_pass;
+        }
+        setWifiName(wifiNameStr1,pass,hidden);//调用设置WiFi名称的方法
+    });
+
+    //设置密码
+    $(".setPwdVal p").click(function(){
+        var pwdVal_old = $("input[name='pwdVal_old']").val();
+        var pwdVal1 = $("input[name='pwdVal1']").val();
+        var pwdVal2 = $("input[name='pwdVal2']").val();
+        var pwdVal3 = $("input[name='pwdVal3']").val();
+        var pwdVal4 = $("input[name='pwdVal4']").val();
+        if(pwdVal_old == ""){
+            alert("请输入原登录密码！");
+            return false;
+        }
+        if(pwdVal1 == ""){
+            alert("请输入新的登录密码！");
+            return false;
+        }
+        if(pwdVal1.length < 8){
+            alert("登录密码不能小于8位！");
+            return false;
+        }
+        if(pwdVal2 == ""){
+            alert("请再次输入登录密码！");
+            return false;
+        }
+        if(pwdVal2.length < 8){
+            alert("登录密码不能小于8位！");
+            return false;
+        }
+        if(pwdVal1 != pwdVal2){
+            alert("两次输入的登录密码不同！");
+            return false;
+        }
+
+        if($("#first_input").is(":visible") && $("#second_input").is(":visible")){//判断WiFi密码是否同时修改
+            if(pwdVal3 == ""){
+                alert("请输入新的WiFi密码！");
+                return false;
+            }
+            if(pwdVal3.length < 8){
+                alert("WiFi密码不能小于8位！");
+                return false;
+            }
+            if(pwdVal4 == ""){
+                alert("请再次输入WiFi密码！");
+                return false;
+            }
+            if(pwdVal4.length < 8){
+                alert("WiFi密码不能小于8位！");
+                return false;
+            }
+            if(pwdVal3 != pwdVal4){
+                alert("两次输入的WiFi密码不同！");
+                return false;
+            }
+            changePWD(pwdVal_old,pwdVal2,pwdVal4);//调用设置密码的方法
+        }else{
+            changePWD(pwdVal_old,pwdVal2);//调用设置密码的方法
+        }
+    });
+    //获取WiFi名称
+    function getWifiName(){
+        $.ajax({
+            type: "POST",
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/sys_hostname_get?token='+token,
+            success: function(data,status){
+                data = JSON.parse(data);
+                var wirelessName = data.hostname;
+                $("#wirelessName").text(wirelessName);
+                $("input[name='wifiName1']").val(wirelessName);
+                if(data.wifihidden==1){
+                    $("input[name='hiddenssid']").attr("checked","checked");
+                }
+                if(data.wifipass =="N/A"){
+                    $("#set_pass option:first").attr("selected","selected");
+                    $("#show_setpass").hide();
+                }else{
+                    $("#set_pass option:last").attr("selected","selected");
+                    $("#show_setpass").show();
+                    $("input[name='wifi_pass']").val(data.wifipass);
+                }
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                alert("无法获取WiFi名称，请稍后重试！");
+            }
+        });
+    }
+
+    //设置WiFi名称
+    function setWifiName(wifiName,pass,hidden){
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/sys_hostname_set?token='+token,
+            data:{hostname:wifiName,action:'apply',pass:pass,hidden:hidden},
+            success: function(data,status){
+                data = JSON.parse(data);
+                alert("设置WiFi配置成功！【提示：wifi将会自动断开】。");
+                location.reload();
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                alert("修改WiFi名称失败，请稍后重试！");
+            }
+        });
+    }
+
+    //设置WiFi和登录密码
+    function changePWD(oldpass,loginPwd,wifiPwd){
+	if(oldpass == loginPwd)
+        {
+	    alert("原密码和新密码相同，不需要修改！");
+            return ;
+	}
+        $.ajax({
+            type: "POST",
+            async: false,
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/sys_password_set?token='+token,
+            data:{oldpw:oldpass,pw:loginPwd,wifiPwd:wifiPwd},
+            success: function(data,status){
+                if(JSON.parse(data).status==0){
+                    alert("原密码错误");
+                }else{
+                    alert("设置密码成功！");
+                                                        var loginUrl ="http://" + window.location.host + "/app_lg.html";            
+                                window.open(loginUrl,"_self");  
+                //    location.reload();
+                }
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+
+                alert("修改密码失败，请稍后重试！");
+            }
+        });
+    }
+    resizeScreen();
+    $(window).resize(function(){
+        resizeScreen();
+    });
+</script>
+
+</body>
+</html>

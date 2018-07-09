@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;  minimum-scale=1.0; maximum-scale=1.0">
+    <meta http-equiv="keywords" content="爱熊宝客户端">
+    <meta name="description" content="爱熊宝操作说明">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <title>家庭网关—登录</title>
+    <style>
+        html,body{  background: -webkit-linear-gradient(#0889D0,#13A0AB,#24C472); /* Safari 5.1 - 6.0 */
+            background: -o-linear-gradient(#0889D0,#13A0AB,#24C472); /* Opera 11.1 - 12.0 */
+            background: -moz-linear-gradient(#0889D0,#13A0AB,#24C472); /* Firefox 3.6 - 15 */
+            background: linear-gradient(#0889D0,#13A0AB,#24C472); /* 标准的语法 */
+            height:100%;position: relative;
+        }
+
+        header{height:50px;}
+        header .txt{font-size: 18px;text-align: center;line-height: 50px;color:#fff;border:1px solid #097CBA;}
+
+        .text_input{margin:20px 0;}
+        .text_input form input{display:block;margin:35px auto;background:none;border:1px solid #08D6F5;font-size:16px;padding-left:10px;color:#08D6F5;height:40px;width:280px;}
+        .login_btn{display:block;margin:0px auto;width:292px;font-size: 16px;color:#fff;height:40px;line-height: 40px;text-align: center;background: #08D6F5;}
+    </style>
+</head>
+<body>
+<header>
+    <div class="txt">登录</div>
+</header>
+    <div class="login_box">
+        <div class="text_input">
+            <form action="" method="post" name="login">
+                <input type="password" placeholder="请输入密码" maxlength="30" name="password">
+            </form>
+        </div>
+        <div class="login_btn">登 录</div>
+    </div>
+
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<script type="text/javascript" src="js/all.js"></script>
+<script>
+    document.write("<s" + "cript id='js_name' type='text/javascript' src='js/app_ixbear.js?" + Math.random() + "'></s" + "cript>");
+</script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        CheckRefresh();
+        //点击登录
+        $(".login_btn").click(function(){
+            var pwdVal = $(".text_input input").val();
+            if(pwdVal == ""){
+                alert("密码不能为空！");
+                return false;
+            }else if(pwdVal.length < 8){
+                alert("密码不能小于8位！")
+                return false;
+            }
+            app_routeLogin(pwdVal);
+        });
+        app_gotoLogin();
+    });
+
+    //获取url参数值
+    function getQueryStringByName(name){
+        var result = location.search.match(new RegExp("[\?\&]" + name+ "=([^\&]+)","i"));
+        if(result == null || result.length < 1){
+            return "";
+        }
+        return result[1];
+    }
+
+    function app_routeLogin(pwd){
+        $.ajax({
+            type: "POST",
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/login_in',
+            data:{pass:pwd},
+            success: function(data,status){
+		data = JSON.parse(data);
+                if(data.token != ""&&data.status != 101){
+                    setTimeout(function(){
+                        app_gotoIndex(data.token);
+                    },1000);
+                }else{
+                    alert("密码错误！");
+                }
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                alert("请求失败，稍后请重试！");
+            }
+        });
+    }
+    function app_gotoLogin(){
+        //判断当前页面是不是login页面，不是则跳转
+        if(location.href.indexOf("app_lg.html") == -1){
+            window.location.href="app_lg.html?sj="+Math.random();
+        }
+    }
+    function app_gotoIndex(token){
+        //判断当前页面是不是index页面不是则跳转
+        if(location.href.indexOf("index.html") == -1){
+            if(undefined != token && "" != token){
+                window.location.href="phone.html?token="+token+"&sj="+Math.random();
+            }else{
+                window.location.href="phone.html?sj="+Math.random();
+            }
+        }
+    }
+</script>
+</body>
+</html>

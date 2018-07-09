@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;  minimum-scale=1.0; maximum-scale=1.0">
+    <meta http-equiv="keywords" content="爱熊宝客户端">
+    <meta name="description" content="爱熊宝操作说明">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <title>家庭网关—注册</title>
+    <style>
+        html,body{  background: -webkit-linear-gradient(#0889D0,#13A0AB,#24C472); /* Safari 5.1 - 6.0 */
+            background: -o-linear-gradient(#0889D0,#13A0AB,#24C472); /* Opera 11.1 - 12.0 */
+            background: -moz-linear-gradient(#0889D0,#13A0AB,#24C472); /* Firefox 3.6 - 15 */
+            background: linear-gradient(#0889D0,#13A0AB,#24C472); /* 标准的语法 */
+        height:100%;}
+
+        header{height:50px;}
+        header .left { background: url("images/register_back.png") no-repeat; background-size:14px 23px; width: 14px; height: 23px; float: left; margin: 13px 0 0px 10px; display: block; }
+        header .txt{font-size: 18px;text-align: center;line-height: 50px;color:#fff;border:1px solid #097CBA;}
+
+        .content form{margin:15px;background: rgba(105, 186, 218, 0.5);border-radius: 5px;}
+        .content form div{height:70px;border-bottom:1px solid #109BB4;}
+        .content form div span{width:70px;line-height: 70px;display: inline-block;color:#fff;font-size: 16px;margin-left: 10px;}
+        .content form div input{background: none;border:none;font-size: 16px;margin-left: 10px;color:#fff;}
+        .content .sure{width:120px;border: 1px solid #fff;color:#fff;border-radius: 25px;display: block;margin:20px auto;height:30px;line-height: 30px;font-size: 18px;text-align: center;}
+
+
+        #container{position: fixed; width: 100%;bottom:0px;display: none;}
+        .address_main {height:auto;width:94%; padding:0px 3%; border-bottom:1px solid #f0f0f0;background:#fff;}
+        .address_main .line {height:44px; width:100%; border-bottom:1px solid #f0f0f0; line-height:44px;}
+
+        .address_main .line input {float:left; height:44px; width:100%; padding:0px; margin:0px; border:0px; outline:none; font-size:16px; color:#666;padding-left:5px;}
+        .address_main .line select  {    -webkit-appearance: none;border:none;height:25px;width:100%;color:#666;font-size:16px;}
+        .sure_select{display:block;margin:10px auto;width:292px;font-size: 16px;color:#fff;height:40px;line-height: 40px;text-align: center;background: #08D6F5;}
+        .sure_select p{font-size: 16px;}
+    </style>
+</head>
+<body>
+<header>
+    <span class="left"></span><div class="txt">注册</div>
+</header>
+    <div class="content">
+        <form action="" method="post" name="login">
+            <div class="PPPOE">
+                <span>PPPOE</span>
+                <input type="text" placeholder="请输入PPPOE" maxlength="30" name="text" class="get_pppoe">
+            </div>
+            <div class="dress">
+                <span>地址</span>
+                <input type="text" placeholder="请输入地址" maxlength="30" name="text" class="city_select">
+            </div>
+            <div class="MAC">
+                <span>MAC地址</span>
+                <input type="text" placeholder="请输入MAC地址" maxlength="30" name="text" class="get_acmac">
+            </div>
+        </form>
+        <p class="sure">确认</p>
+    </div>
+<div id="container">
+    <div class="address_main">
+        <div class="line">
+            <!-- sel-provance -->
+            <select id="s_province" name="s_province"></select><br>
+        </div>
+        <div class="line">
+            <select id="s_city" name="s_city" ></select><br><!-- sel -->
+        </div>
+        <div class="line">
+            <!-- sel-area -->
+            <select id="s_county" name="s_county"></select><br>
+        </div>
+        <script type="text/javascript" src="js/area.js"></script>
+        <script type="text/javascript">_init_area();</script>
+
+        <div class="line"><input type="text" placeholder="详细地址" id="address" value=""></div>
+
+        <div class="sure_select"><p>确定</p></div>
+    </div>
+</div>
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script language="javascript" src="js/jquery.gcjs.js"></script>
+
+<script>
+    $(function(){
+        var acmac=getQueryStringByName("acmac");
+        $(".city_select").click(function(){
+            $("#container").show();
+        });
+        $(".get_acmac").val(acmac);
+
+        //获取地址
+        $(".sure_select").click(function(){
+           var s_provincew=$("#s_province").val();
+           var s_cityw= $("#s_city").val();
+           var s_countyw= $("#s_county").val();
+           var addressw= $("#address").val();
+
+            $(".city_select").val(s_provincew+s_cityw+s_countyw+addressw);
+            $("#container").hide();
+        });
+    })
+    function getQueryStringByName(name){
+        var result = location.search.match(new RegExp("[\?\&]" + name+ "=([^\&]+)","i"));
+        if(result == null || result.length < 1){
+            return "";
+        }
+        return result[1];
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,192 @@
+#!/bin/sh
+
+urlweb="www.baidu.com  www.qq.com  www.aliyun.com"
+
+
+
+flag=0
+stanum=0
+
+check_online()
+{
+
+#urlweb="www.baidu.com  www.qq.com  www.aliyun.com"
+renew=1
+echo "test.....check_online"
+
+for url in $urlweb
+do
+
+
+if ping -c 2 -W 1 $url >/dev/null ;then
+
+echo "yes"
+renew=0
+
+break
+else
+
+# udhcpc -q -i br-lan Renew
+ echo "no"
+ echo $url
+ continue
+fi
+
+done
+
+if [ $renew -eq 1 ];then
+
+
+
+        killall -9 udhcpc
+
+
+fi
+
+}
+
+
+
+
+
+check_channle(){
+
+	channle_config=`uci get wireless.ra0.channel`
+		
+
+	ssid=`uci get wireless.@wifi-iface[$stanum].ssid`
+	
+	bssid=`uci get wireless.@wifi-iface[$stanum].bssid`	
+#	channle=$(iwinfo ra0 s | grep -A 1 $ssid | grep Channel | awk  '{print $4}')
+
+
+	                                                                                   
+        echo "ssid=$ssid"   
+        echo "bssid=$bssid" 
+
+if [$bssid = ""] ;then
+
+        relaytobridge.lua
+fi
+
+        i=0
+        
+        while [ $i -lt 5 ]
+        do
+ 
+        channle=$(iwinfo ra0 s | grep -A 1 $ssid | grep Channel | awk  '{print $4}')
+        [ -z $channle ] || break
+        
+        i=$(($i+1))
+        
+        done    
+#       channle=$(iwinfo ra0 s | grep -A 1 $ssid  | awk  '{print $5}' )
+
+#       echo $channle
+
+
+       [ -z $channle ] && {
+        
+        echo "get channel by bssid"
+        iwpriv ra0 set SiteSurvey=1
+        channle=$(iwpriv ra0 get_site_survey | grep $bssid | awk '{print $1}')
+
+        
+        echo "channel=$channle" 
+        }  
+
+        if [ $channle != $channle_config ];then
+
+        uci set wireless.ra0.channel=$channle
+        uci commit wireless
+
+        sleep 1
+        wifi
+        
+        fi
+	
+
+}
+
+thres=`uci get wireless.ra0.AssocReqRssiThres 2>/dev/null`
+echo $thres
+if [ "88" = "$thres" ] ;then
+  uci set wireless.ra0.AssocReqRssiThres=;
+  uci set wireless.ra0.KickStaRssiLow=;
+  uci commit wireless;
+fi
+relaytobridge.lua
+
+is_bridge(){
+
+flag=0
+
+i=0
+#echo "yy"
+while [ $i -lt 4 ]
+do
+
+
+
+
+
+        modeflag=`uci get wireless.@wifi-iface[$i].mode`
+ 
+
+        if [ "$modeflag" == "sta" ];then
+
+	flag=1        
+	stanum=$i
+	
+        break
+        fi
+
+
+        i=$(($i+1))
+#echo "xx"
+done
+	disableflg=`uci get wireless.@wifi-iface[$stanum].disabled` 
+	[ $disableflg = 1 ] && flag=0
+
+	
+
+}
+
+
+
+
+while [ 1 ]
+do
+
+# echo "aa"
+  is_bridge
+	#echo "stanum=$stanum"	
+  if [ $flag == 1 ];then	
+
+	 gateway=$(ip route show | grep default  | awk  '{print $3}' )
+
+	 #echo $gateway
+
+		if ping -c 3 -W 1 $gateway  >/dev/null ;then
+
+		flag=1
+		else
+
+
+		check_channle
+			
+		fi
+		
+
+  fi	
+
+
+sleep 20
+check_online
+
+done
+
+
+
+
+

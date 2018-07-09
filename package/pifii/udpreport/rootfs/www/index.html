@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>家庭路由-配置</title>
+        <meta http-equiv=“X-UA-Compatible” content="IE=8">
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+        <meta name="keywords" content="爱熊宝" />
+        <meta name="description" content="爱熊宝" />
+        <meta name="renderer" content="webkit|ie-comp|ie-stand">
+        <meta http-equiv="Expires" content="0">
+        <meta http-equiv="Pragma" content="no-cache">
+        <meta http-equiv="Cache-control" content="no-cache">
+        <meta http-equiv="Cache" content="no-cache">
+        <link rel="stylesheet" type="text/css" href="css/common.css" />
+        <link rel="stylesheet" type="text/css" href="css/hideScrollbar.css" />
+        <link rel="stylesheet" type="text/css" href="css/ixbsetting.css" />
+		<link rel="shortcut icon" type="image/x-icon" href="images/logo.png" />
+        <style>.loading{position: fixed;height:100%;width: 100%;top:0px;z-index: 999; background: #fff;}
+        .statse{position: absolute; margin-top: 100px; width: 100%; margin-left: -35px; z-index: 10;}
+        .texy{width:300px;display: block;margin:0 auto;text-align: left;}
+        .wtype{font-size: 18px; color: #fff;}
+        .wsucc{font-size: 18px; color: #fff; margin-top: 15px;}
+        </style>
+        <script type="text/javascript" src="js/all.js"></script>
+	</head>
+	<body>
+    <div class="loading"><p style="font-size: 16px;color: #333;text-align: center;margin-top: 120px;">加载中...</p></div>
+        <iframe id="register_iframe" src="" width="0px" height="0px" frameborder="0" scrolling="no"></iframe>
+    	<div class="outer">
+        	<div class="header">
+            	<div class="h_l">
+                	<img src="images/pic2.png">
+                </div>
+                <div class="h_r">
+                	<ul>
+                    	<li><a href="top.html">更多设置</a>&nbsp;|&nbsp;</li>
+                    	<li><a href="javascript:void(0);" class="set_wifiName">无线设置</a>&nbsp;|&nbsp;</li>
+                    	<li><a href="javascript:void(0);" class="set_wifiPwd">修改密码</a>&nbsp;|&nbsp;</li>
+                        <li><a href="javascript:void(0);" class="show_runningState">运行状态</a>&nbsp;|&nbsp;</li>
+                        <li><a href="javascript:void(0);" class="exit">退出</a></li>	
+                    </ul>
+                </div>
+            </div>
+            <div class="menu_bar">
+            	<ul>
+                	<li class="current"><a href="javascript:void(0);"><img src="images/menu1.png"><p>首页</p></a></li>
+                    <li><a href="javascript:void(0);"><img src="images/menu2.png"><p>网络设置</p></a></li>
+                    <li><a href="javascript:void(0);"><img src="images/menu3.png"><p>设备列表</p></a></li>
+                    <li><a href="javascript:void(0);"><img src="images/menu4.png"><p>系统管理</p></a></li>
+                </ul>
+            </div>
+            <div class="show_content">
+            	<div class="content_1">
+                    <div class="statse">
+                        <div class="texy">
+                            <p class="wtype"></p>
+                            <p class="wsucc">连接状态：获取中...</p>
+                        </div>
+                    </div>
+                	<div class="content_1_c">
+                    	<img src="images/pic3.png">
+                        <div class="content_1_l">
+                        	<img src="images/pic4.png" class="img_1">
+                            <p class="outside_network_set">
+                            	<img src="images/pic5.png">
+                            </p>
+                            <img src="images/pic6.png" class="img_2">
+                        </div>
+                        <div class="content_1_r">
+                        	<img src="images/pic7.png" class="img_1">
+                            <p class="network_set">
+                            	<img src="images/pic8.png">
+                            </p>
+                            <img src="images/pic9.png" class="img_2">
+                        </div>
+                        <div class="content_1_port">
+                        	<ul>
+                            	<li class="port1 fadeIn"><img src="images/port.png"></li>
+                                <li class="port2 fadeIn"><img src="images/port.png"></li>
+                                <li class="port3 fadeIn"><img src="images/port.png"></li>
+                                <li class="port4 fadeIn"><img src="images/port.png"></li>
+                                <li class="port5 fadeIn"><img src="images/port.png"></li>
+                            </ul>
+                        </div>
+                        <div class="article bounce">
+                        	<img src="images/article.png">
+                        </div>
+                        <div class="content_1_b">
+                        	<p>已有&nbsp;<span class="connect_num">0</span>&nbsp;&nbsp;台设备连接到路由器</p>
+                        </div>
+                    </div>
+                </div>
+                <!--content_1 the end-->
+                <div class="content_2">
+                	<div class="content_2_menu">
+                    	<ul>
+                        	<li>LAN口设置</li>
+                            <li class="active">上网设置</li>
+                            <!--<li>无线设置</li>-->
+                        </ul>
+                    </div>
+                    <div class="content_2_list">
+                    	<ul>
+                            <li style="display: none;">
+                                <div class="lanip">
+                                    <label>I P地址：</label>
+                                    <input type="text" name="lanip" placeholder="请输入IP地址" maxlength="20" class="ipVal" id="ipsv">
+                                </div>
+                                <button class="lanconfirm">确定</button>
+                            </li>
+                            <li>
+                            	<div>
+                                    <label>上网方式：</label>
+                                    <div class="select">
+                                    	<span>PPPoE拨号</span>
+                                        <dl class="get_onlineStyle">
+                                        </dl>
+                                    </div>
+                                </div>
+                                
+                                <div class="name">
+                                    <label>账号：</label>
+                                    <input type="text" name="wideNetwork" placeholder="请输入宽带帐号" maxlength="30" class="wideNetworkNum">
+                                </div>                                   
+                                <div class="ip">
+                                    <label>I P地址：</label>
+                                    <input type="text" name="ip" placeholder="请输入IP地址" maxlength="20" class="ipVal">
+                                </div>
+                                <div class="mask">
+                                    <label>掩码：</label>
+                                    <div class="select_mask">
+                                    	<input type="text" value="255.255.255.0" />
+                                        <dl class="get_mask">
+                                        	<dd data-value="255.255.255.0">255.255.255.0</dd>
+                                        	<dd data-value="255.255.255.255">255.255.255.255(/32)</dd>
+                                            <dd data-value="255.255.255.254">255.255.255.254(/31)</dd>
+                                            <dd data-value="255.255.255.252">255.255.255.252(/30)</dd>
+                                            <dd data-value="255.255.255.248">255.255.255.248(/29)</dd>
+                                            <dd data-value="255.255.255.240">255.255.255.240(/28)</dd>
+                                            <dd data-value="255.255.255.224">255.255.255.224(/27)</dd>
+                                            <dd data-value="255.255.255.192">255.255.255.192(/26)</dd>
+                                            <dd data-value="255.255.240.0">255.255.240.0(/20)</dd>
+                                            <dd data-value="255.255.224.0">255.255.224.0(/19)</dd>
+                                            <dd data-value="255.255.192.0">255.255.192.0(/18)</dd>
+                                            <dd data-value="255.255.128.0">255.255.128.0(/17)</dd>
+                                            <dd data-value="255.255.0.0">255.255.0.0(/16)</dd>
+                                            <dd data-value="255.254.0.0">255.254.0.0(/15)</dd>
+                                            <dd data-value="255.252.0.0">255.252.0.0(/14)</dd>
+                                            <dd data-value="255.248.0.0">255.248.0.0(/13)</dd>
+                                            <dd data-value="255.240.0.0">255.240.0.0(/12)</dd>
+                                            <dd data-value="240.0.0.0">240.0.0.0(/4)</dd>
+                                            <dd data-value="224.0.0.0">224.0.0.0(/3)</dd>
+                                            <dd data-value="192.0.0.0">192.0.0.0(/2)</dd>
+                                            <dd data-value="128.0.0.0">128.0.0.0(/1)</dd>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <div class="gateway">
+                                    <label>网关地址：</label>
+                                    <input type="text" name="gateway" placeholder="请输入网关地址" maxlength="20" class="gatewayVal">
+                                </div>
+                                <div class="dns">
+                                    <label>DNS：</label>
+                                    <input type="text" name="dns" placeholder="请输入DNS（默认不需要填写）" maxlength="40" class="dnsVal">
+                                </div>
+                                <div class="use">
+                                    <label>已连接：</label>
+                                    <span id="wifiName"></span>
+                                </div>
+                                <div class="wifi">
+                                    <label class="wifi_logo"></label>
+                                    <div class="select_wifi">
+                                    	<span></span>
+                                        <dl class="get_wifiList">
+                                        </dl>
+                                    </div>
+                                    <a href="javascript:void(0);" class="wifi_reload" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                                        <img src="images/wifi_reload.png" style="width:20px;"/>
+                                    </a>
+                                </div>
+                                <div class="pwd">
+                                    <label>密码：</label>
+                                    <input type="text" name="wideNetworkPwd" placeholder="请输入密码" maxlength="30" class="wideNetworkPwd" id="wideNetworkPwd">
+                                    <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                                        <img src="images/btn_eye_on.png" style="width:20px;"/>
+                                    </a>
+                                </div>
+                                <div class="wifipwd">
+                                    <label>密码：</label>
+                                    <input type="text" name="wifipwd" placeholder="请输入密码" maxlength="30" class="wideNetworkPwd" id="wifdePwd">
+                                    <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                                        <img src="images/btn_eye_on.png" style="width:20px;"/>
+                                    </a>
+                                </div>
+                                <button class="confirm">确定</button>
+                            </li>
+                                   
+                        </ul>
+                    </div>
+                </div>
+                <!--content_2 the end-->
+                
+                <div class="content_3">
+                	<div class="content_3_menu">
+                    	<ul>
+                        	<!--<li>绿色模式</li>
+                            <li>学习模式</li>-->
+                            <li class="active">设备列表</li>
+                        </ul>
+                    </div>
+                    <div class="content_3_list">
+                    	<dl>
+                        	<dd>
+                                <ul id="list1">
+                                    <!--<li>
+                                        <span>网站地址</span>
+                                        <span>备注</span>
+                                        <span>操作</span>
+                                    </li>
+                                    <li>
+                                        <span>www.sina.com</span>
+                                        <span>新浪</span>
+                                        <span class="deleted">删除</span>
+                                    </li>
+                                    <li>
+                                        <span>www.163.com</span>
+                                        <span>网易</span>
+                                        <span class="deleted">删除</span>
+                                    </li>
+                                    <li>
+                                        <span>www.baidu.com</span>
+                                        <span>百度</span>
+                                        <span class="deleted">删除</span>
+                                    </li>
+                                    <li>
+                                        <span>www.qq.com</span>
+                                        <span>腾讯</span>
+                                        <span class="deleted">删除</span>
+                                    </li>
+                                    <li>
+                                        <span>www.tmall.com</span>
+                                        <span>天猫</span>
+                                        <span class="deleted">删除</span>
+                                    </li>-->
+                                </ul>
+                               </dd>
+                            
+                            <dd>
+                                <ul id="list2">
+
+                                </ul>
+                            </dd>
+                            
+                            <dd>
+                            	<ul id="list3">
+                                	<!--<li>
+                                    	<div class="show_icon"><img src="images/pc_icon.png"></div>
+                                        <div class="terminal_info">
+                                        	<h2>administrator-1</h2>
+                                            <div class="info_type">
+                                            	<a href="javascript:void(0);"><label>已连接：</label><span>30</span><span>分</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>连接类型：</label><span>WiFi 2G</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>IP地址：</label><span>192.168.1.10</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>MAC地址：</label><span>98:3B:13:0E:56</span></a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                    	<div class="show_icon"><img src="images/phone_icon.png"></div>
+                                        <div class="terminal_info">
+                                        	<h2>iPhone6s plus</h2>
+                                            <div class="info_type">
+                                            	<a href="javascript:void(0);"><label>已连接：</label><span>30</span><span>分</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>连接类型：</label><span>WiFi 2G</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>IP地址：</label><span>192.168.1.10</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>MAC地址：</label><span>98:3B:13:0E:56</span></a>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                    	<div class="show_icon"><img src="images/pc_icon.png"></div>
+                                        <div class="terminal_info">
+                                        	<h2>administrator-1</h2>
+                                            <div class="info_type">
+                                            	<a href="javascript:void(0);"><label>已连接：</label><span>30</span><span>分</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>连接类型：</label><span>WiFi 2G</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>IP地址：</label><span>192.168.1.10</span></a>&nbsp;|&nbsp;
+                                                <a href="javascript:void(0);"><label>MAC地址：</label><span>98:3B:13:0E:56</span></a>
+                                            </div>
+                                        </div>
+                                    </li>-->
+                                </ul>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                <!--content_3 the end-->
+                
+                <div class="content_4">
+                	<div class="content_4_menu">
+                    	<ul>
+                        	<li class="active">固件升级</li>
+                            <li>恢复出厂设置</li>
+                            <li>重启路由器</li>
+                        </ul>
+                    </div>
+                    <div class="content_4_list">
+                    	<dl>
+                        	<dd class="update_dd">
+                            	<ul>
+                                	<li>
+                                    	<label>当前固件版本：</label>
+                                        <span class="current_version">获取中...</span>
+                                    </li>
+                                    <li>
+                                    	<label>最新固件版本：</label>
+                                        <span class="new_version"></span>
+                                        <span class="refresh">刷新</span>
+                                    </li>
+                                </ul>
+                                <div class="update">
+                                	<p data-clicked="0">升级到最新固件</p>
+                                </div>
+                            </dd>
+                            <dd class="recover_dd">
+                            	<ul>
+                                	<li>
+                                        <span>重启过程大约需要60~90秒，期间会断开网络连接<br>清除路由的所有设置信息，恢复到出厂状态<br>但会保留绑定的帐号</span>
+                                    </li>
+                                </ul>
+                                <div class="recover">
+                                	<p data-clicked="0">恢复出厂设置</p>
+                                </div>
+                            </dd>
+                            <dd class="reboot_dd">
+                            	<ul>
+                                	<li>
+                                        <span>重启过程大约需要60~90秒，期间会断开网络连接<br>重启完毕后将自动恢复网络连接</span>
+                                    </li>
+                                </ul>
+                                <div class="reboot">
+                                	<p data-clicked="0">重启路由器</p>
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+                <!--content_4 the end-->
+                
+            </div>
+            <!--layer层-->
+            <div class="running_state layui-anim">
+            	<ul>
+                	<li>
+                    	<label>当前连接方式：</label>
+                        <span id="connectWay">数据获取中...</span>
+                    </li>
+                    <li>
+                    	<label>IP 地址：</label>
+                        <span id="idAddress">获取中...</span>
+                    </li>
+                    <li>
+                    	<label>DNS：</label>
+                        <span id="dnsAddress">获取中...</span>
+                    </li>
+                    <li>
+                    	<label>无线连接名称：</label>
+                        <span id="wirelessName">获取中...</span>
+                    </li>
+                    <li>
+                    	<label>设备连接数：</label>
+                        <span id="wirelessNum">获取中...</span>
+                    </li>
+                </ul>
+                <div class="closed_state">
+                	<p>关闭</p>
+                </div>
+            </div>
+            <div class="change_pwd layui-anim">
+            	<ul>
+                    <li>
+                        <label>原密码：</label>
+                        <input type="password" placeholder="请输入原登录密码" name="pwdVal_old" maxlength="30" id="pwdVal_old">
+                        <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                            <img src="images/btn_eye_off.png" style="width:20px;"/>
+                        </a>
+                    </li>
+                	<li>
+                    	<label>登录密码：</label>
+                        <input type="password" placeholder="请输入新的登录密码" name="pwdVal1" maxlength="30" id="pwdVal1">
+                        <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                            <img src="images/btn_eye_off.png" style="width:20px;"/>
+                        </a>
+                    </li>
+                    <li>
+                    	<label>确认登录密码：</label>
+                        <input type="password" placeholder="再次输入登录密码" name="pwdVal2" maxlength="30" id="pwdVal2">
+                        <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                            <img src="images/btn_eye_off.png" style="width:20px;"/>
+                        </a>
+                        <span id="set_wifiPWD">修改WiFi密码</span>
+                    </li>
+                    <li id="first_input">
+                    	<label>WiFi密码：</label>
+                        <input type="password" placeholder="请输入新的WiFi密码" name="pwdVal3" maxlength="30" id="pwdVal3">
+                        <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                            <img src="images/btn_eye_off.png" style="width:20px;"/>
+                        </a>
+                    </li>
+                    <li id="second_input">
+                    	<label>确认WiFi密码：</label>
+                        <input type="password" placeholder="再次输入WiFi密码" name="pwdVal4" maxlength="30" id="pwdVal4">
+                        <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                            <img src="images/btn_eye_off.png" style="width:20px;"/>
+                        </a>
+                    </li>
+                </ul>
+                <div class="btn">
+                    <div class="closed">
+                        <p>关闭</p>
+                    </div>
+                    <div class="confirmation setPwdVal">
+                    	<p>确定</p>
+                    </div>
+                </div>
+            </div>
+            <div class="change_wifiName layui-anim">
+            	<ul>
+                	<li>
+                    	<label>wifi名称：</label>
+                        <input type="text" placeholder="WiFi名称" name="wifiName1" maxlength="20">
+                    </li>
+                    <li>
+                        <label>wifi密码：</label>
+                        <select id="set_pass">
+                            <option value = "pass_null">无密码</option>
+                            <option value = "pass_set">设置密码</option>
+                        </select>
+                    </li>
+                    <li id="show_setpass">
+                    	<label>设置密码：</label>
+                        <input type="passwo" placeholder="请输入新的WiFi密码" name="wifi_pass" maxlength="20" id="showpas">
+                        <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 12px 5px 0px 10px; color: #fff;">
+                            <img src="images/btn_eye_off.png" style="width:20px;"/>
+                        </a>
+                    </li>
+                    <li>
+                        <label>隐藏ssid：</label>
+                        <input type="checkbox" name="hiddenssid" value="1" style="width:15px;position: relative;top: 2px;"><span style="color: #fff;font-size: 14px; top: 0px; display: inline-block; position: relative;">隐藏</span>
+                    </li>
+                </ul>
+                <div class="btn">
+                    <div class="closed">
+                        <p>关闭</p>
+                    </div>
+                    <div class="confirmation setWifiName">
+                    	<p>确定</p>
+                    </div>
+                </div>
+            </div>
+            <div class="transparent"></div>		
+        </div>
+        <script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+        <script type="text/javascript" src="js/jquery.cookie.js"></script>
+    <script>
+        document.write("<s" + "cript id='js_name' type='text/javascript' src='js/ixbear.js?" + Math.random() + "'></s" + "cript>");
+        document.write("<s" + "cript id='js_name' type='text/javascript' src='js/ixbsetting.js?" + Math.random() + "'></s" + "cript>");
+    </script>
+        <script type="text/javascript">
+        	$(document).ready(function() {
+                setTimeout(function(){$(".loading").remove();},500);
+                $(".pwd_btn").bind('click',function(){
+                    var _this=$(this);
+                    var imgs=$(this).find("img");
+                    if(imgs.attr("src").indexOf("off")>-1){
+                        imgs.attr("src","images/btn_eye_on.png");
+                        var thisid=_this.prev().attr("id");
+                        var wifiPwd=document.getElementById(thisid);
+                        wifiPwd.type="text";
+                    }else{
+                        imgs.attr("src","images/btn_eye_off.png");
+                        var thisid=_this.prev().attr("id");
+                        var wifiPwd=document.getElementById(thisid);
+                        wifiPwd.type="password";
+                    }
+                })
+                $("#ipsv").val(window.location.host);
+            });
+        </script>		
+	</body>   
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html PUBLIC "-//WAPFORUM//DTD XHTML Mobile 1.0//EN" "http://www.wapforum.org/DTD/xhtml-mobile10.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0;  minimum-scale=1.0; maximum-scale=1.0">
+    <meta http-equiv="keywords" content="爱熊宝客户端">
+    <meta name="description" content="爱熊宝操作说明">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-control" content="no-cache">
+    <meta http-equiv="Cache" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="css/common.css" />
+    <title>家庭网关—拨号</title>
+    <style>
+        html,body{  background: -webkit-linear-gradient(#0889D0,#13A0AB,#24C472); /* Safari 5.1 - 6.0 */
+            background: -o-linear-gradient(#0889D0,#13A0AB,#24C472); /* Opera 11.1 - 12.0 */
+            background: -moz-linear-gradient(#0889D0,#13A0AB,#24C472); /* Firefox 3.6 - 15 */
+            background: linear-gradient(#0889D0,#13A0AB,#24C472); /* 标准的语法 */
+            height:100%;}
+
+        header{height:50px;}
+        header .left { background: url("images/register_back.png") no-repeat; background-size:14px 23px; width: 14px; height: 23px; float: left; margin: 13px 0 0px 10px; display: block; }
+        header .right { background: url("images/confirm.png") no-repeat; background-size:25px 18px; width: 25px; height: 18px; float: right; margin: 13px 0 0px 10px; display: block; position: relative; top: -46px; right: 10px;}
+        header .txt{font-size: 18px;text-align: center;line-height: 50px;color:#fff;border:1px solid #097CBA;}
+
+
+        .text_input form div{height:70px;width: 290px; margin: 0 auto; display: block;}
+        .text_input form div span{width:85px;line-height: 70px;display: inline-block;color:#fff;font-size: 16px;margin-left: 10px;}
+        .text_input form div input{margin: 35px auto; background: none; border: 1px solid #08D6F5; font-size: 16px; padding-left: 10px; color: #08D6F5; height: 40px; width: 150px;    background: #fff;}
+        .text_input .confirm{width:240px;border: 1px solid #fff;color:#fff;border-radius: 8px;display: block;margin:60px auto;height:30px;line-height: 30px;font-size: 18px;text-align: center;}
+    </style>
+    <script type="text/javascript" src="js/all.js"></script>
+</head>
+<body>
+<header>
+    <span class="left"></span><div class="txt">拨号接入</div>
+</header>
+    <div class="login_box">
+        <div class="text_input">
+            <form action="" method="post" name="login">
+                <div class="name">
+                    <span>宽带帐号：</span>
+                    <input type="text" name="wideNetwork" placeholder="请输入宽带帐号" maxlength="30" class="wideNetworkNum">
+                </div>
+                <div class="name">
+                    <span>宽带密码：</span>
+                    <input type="text" name="wideNetworkPwd" placeholder="请输入宽带密码" maxlength="30" class="wideNetworkPwd" id="asd">
+                    <a href="javascript:void(0);" class="pwd_btn" style="position: absolute; font-size: 16px; margin: 45px 5px 0px 15px; color: #fff;">
+                        <img src="images/btn_eye_on.png" style="width:20px;"/>
+                    </a>
+
+                </div>
+                <div class="name">
+                    <span>DNS：</span>
+                    <input type="text" name="dns" placeholder="请输入DNS" maxlength="40" class="dnsVal">
+                </div>
+
+                <div class="confirm">登 录</div>
+            </form>
+        </div>
+    </div>
+
+<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="js/jquery.cookie.js"></script>
+<script type="text/javascript" src="js/app_ixbear.js"></script>
+
+<script>
+    initPageData(true);
+    //初始状态
+    var models;
+    function initPageData(refresh){
+        $.ajax({
+            type: "POST",
+            url: 'http://'+window.location.host+'/cgi-bin/luci/admin/wan_ip_get?token='+token,
+            success: function(data,status){
+                data = JSON.parse(data);
+                models = data;
+                if(refresh){
+                    $("#"+data.wantype).click();
+
+                    $(".wideNetworkNum").val(data.pppoe.user);
+                    $(".wideNetworkPwd").val(data.pppoe.pass);
+                    $(".dnsVal").val(data.pppoe.dns);
+
+                }
+            },
+            error: function(jqXHR, textStatus,errorThrown){
+                //alert("请求失败，稍后请重试！");
+            }
+        });
+        setTimeout(function(){
+            if(!isFirst){
+                isFirst=true;
+                initPageData(true);
+            }
+        },20000);
+    }
+    $(function(){
+        CheckRefresh();
+        $(".pwd_btn").bind('click',function(){
+            var _this=$(this);
+            var imgs=$(this).find("img");
+            if(imgs.attr("src").indexOf("off")>-1){
+                imgs.attr("src","images/btn_eye_on.png");
+                var thisid=_this.prev().attr("id");
+                var wifiPwd=document.getElementById(thisid);
+                wifiPwd.type="text";
+            }else{
+                imgs.attr("src","images/btn_eye_off.png");
+                var thisid=_this.prev().attr("id");
+                var wifiPwd=document.getElementById(thisid);
+                wifiPwd.type="password";
+            }
+        })
+        $(".confirm").click(function(){
+            var url = 'http://'+window.location.host+'/cgi-bin/luci/admin/wan_ip_set?token='+token;
+            var user = $(".wideNetworkNum").val();
+            var pass = $(".wideNetworkPwd").val();
+            var dns = $(".dnsVal").val();
+            if (user == '') {
+                      alert('pppoe账号为空，请重新输入');
+                      $(".wideNetworkNum").focus();
+                      return;
+            }
+            var data = {proto:'pppoe',user:user,pass:pass,dns:dns};
+
+            $.ajax({
+                type: "POST",
+                async: false,
+                url: url,
+                data:data,
+                success: function(data,status){
+                    initPageData(false);
+                    $(".confirm").unbind("click");
+                    setTimeout(function(){
+                        location.href="phone.html?token="+token+"&sj="+Math.random();
+                    },5000);
+                },
+                error: function(jqXHR, textStatus,errorThrown){
+                    alert("设置网络失败，请稍后重试！");
+                }
+            });
+        });
+
+        $(".left").click(function(){
+            location.href="link_setting.html?token="+token+"&sj="+Math.random();
+        });
+    })
+
+</script>
+</body>
+</html>
