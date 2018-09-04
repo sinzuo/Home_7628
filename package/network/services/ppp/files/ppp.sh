@@ -125,8 +125,6 @@ ppp_generic_setup() {
 		ifname "$pppname" \
 		${localip:+$localip:} \
 		${lcp_failure:+lcp-echo-interval $lcp_interval lcp-echo-failure $lcp_failure $lcp_adaptive} \
-		${ipv6:++ipv6} \
-		${autoipv6:+set AUTOIPV6=1} \
 		nodefaultroute \
 		usepeerdns \
 		$demand maxfail 1 \
