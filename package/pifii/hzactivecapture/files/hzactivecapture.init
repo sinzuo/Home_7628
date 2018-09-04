@@ -1,0 +1,19 @@
+#!/bin/sh /etc/rc.common
+
+START=95
+
+#NAME=hzactivecapture
+PROG=/activecap/output/activecapture
+
+start() {
+        service_start "$PROG" -i br-lan -f
+}
+
+stop() {
+        service_stop "$PROG" 
+}
+
+restart() {
+        stop 
+        start
+}
