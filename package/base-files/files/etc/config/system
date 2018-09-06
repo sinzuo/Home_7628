@@ -1,5 +1,5 @@
 config system
-	option hostname	tz
+	option hostname	fq
 	option zonename 'Asia/Shanghai'
 	option timezone 'CST-8'
 	option conloglevel '8'
