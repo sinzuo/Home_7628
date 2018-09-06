@@ -1002,6 +1002,7 @@ Image/Build/Profile/FJ=$(call BuildFirmware/Default8M/$(1),$(1),fj,FJ)
 Image/Build/Profile/SC=$(call BuildFirmware/Default8M/$(1),$(1),sc,SC)
 Image/Build/Profile/BL=$(call BuildFirmware/Default16M/$(1),$(1),bl,BL)
 Image/Build/Profile/JX=$(call BuildFirmware/Default8M/$(1),$(1),jx,JX)
+Image/Build/Profile/FQ=$(call BuildFirmware/Default16M/$(1),$(1),fq,FQ)
 
 ifeq ($(SUBTARGET),mt7628)
 define Image/Build/Profile/Default
@@ -1011,6 +1012,7 @@ define Image/Build/Profile/Default
 	$(call Image/Build/Profile/SC,$(1))
 	$(call Image/Build/Profile/BL,$(1))
 	$(call Image/Build/Profile/JX,$(1))
+	 $(call Image/Build/Profile/FQ,$(1))
 endef
 endif
 

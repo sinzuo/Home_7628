@@ -430,6 +430,9 @@ ramips_board_detect() {
         *"IJLY_420")
                 name="bl"
                 ;;
+	*"FQ")
+                name="fq"
+                ;;
         *"MT7628-SC")
                 name="sc"
                 ;;

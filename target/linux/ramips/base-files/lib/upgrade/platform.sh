@@ -19,6 +19,7 @@ platform_check_image() {
 	fj	|\
 	sc	|\
 	bl	|\
+	fq	|\
 	3g-6200n | \
 	3g-6200nl | \
 	3g150b | \

@@ -156,6 +156,7 @@ ramips_setup_interfaces()
 		;;
 
 	bl |\
+	fq |\
 	sc)
 		ucidef_set_interfaces_lan_wan "eth0.1" "eth0.2"
 		ucidef_add_switch "switch0" "1" "1"
