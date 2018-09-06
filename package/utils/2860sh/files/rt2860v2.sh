@@ -944,7 +944,7 @@ detect_rt2860v2() {
 	rt2860v2_mac=$(rt2860v2_get_mac factory)	
 	
 #	ssid=wireless-`ifconfig eth0 | grep HWaddr | cut -c 48- | sed 's/://g'`
-	ssid=ihome-`echo $rt2860v2_mac  | cut -c 9- |  sed 's/://g'`
+	ssid=wireless-`echo $rt2860v2_mac  | cut -c 9- |  sed 's/://g'`
 
 	
 		cat <<EOF
@@ -953,7 +953,7 @@ config wifi-device  ra${i}
 	option mode 	7
 	option channel  auto
 	option txpower  100
-	option ht 	20+40
+	option ht 	20
 	option country  CN
 	
 # REMOVE THIS LINE TO ENABLE WIFI:
@@ -965,7 +965,7 @@ config wifi-iface
 	option mode     ap
 	option ssid     $ssid
 	option encryption none
-#	option portal 1
+	option portal 1
 #	option encryption psk2
 #	option key $pre_wpa2_key
 
