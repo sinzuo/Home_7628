@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tz-andlink
-PKG_RELEASE:=1.11
+PKG_RELEASE:=1.12
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
@@ -38,6 +38,7 @@ define Package/tz-andlink/install
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/mt7628/coap-resources-process $(1)/usr/sbin
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/mt7628/andlink-report $(1)/usr/sbin
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/mt7628/andlink-sysupgrade $(1)/usr/sbin
+	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/mt7628/andlink-macfilter $(1)/usr/sbin
 	$(INSTALL_DIR)  $(1)/usr/lib/lua
 	$(INSTALL_BIN)  $(PKG_BUILD_DIR)/mt7628/andlinkcommon.lua $(1)/usr/lib/lua
 	$(INSTALL_DIR)  $(1)/etc/init.d

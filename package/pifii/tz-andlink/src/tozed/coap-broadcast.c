@@ -19,7 +19,7 @@
 #include <coap/coap.h>
 #include <coap/coap_dtls.h>
 
-
+uint8_t g_coap_message = COAP_MESSAGE_CON; //default NON
 
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -107,6 +107,22 @@ static int broadcast_send(const char *addr,const int port,char *data,uint32_t da
 		printf("set socket error...\n");
 		return -1;
 	}
+        struct timeval timeout = {3,0};
+        //wait for 3s
+        if( setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout) ) < 0 )
+        {    
+                close(sock);
+                printf("can't set receive timeout!\n");
+                return -1;
+        }    
+     
+        //wait for 3s
+        if( setsockopt(sock,SOL_SOCKET,SO_SNDTIMEO,&timeout,sizeof(timeout) ) < 0 )
+        {    
+                close(sock);
+                printf("can't set send timeout!\n");
+                return -1;
+        }
 
 	struct sockaddr_in addrto;
 	bzero(&addrto, sizeof(struct sockaddr_in));
@@ -127,11 +143,29 @@ static int broadcast_send(const char *addr,const int port,char *data,uint32_t da
 	int nlen=sizeof(addrto);
 
 	int ret=sendto(sock, data, datalen, 0, (struct sockaddr*)&addrto, nlen);
-	if(ret<0){
-		printf("failed\n");
+	if(ret <= 0){
+		printf("send failed\n");
 	}
-	else{
-		printf("ok\n");	
+	else if(COAP_MESSAGE_CON == g_coap_message){
+	        struct sockaddr_in addrfrom;
+	        bzero(&addrfrom, sizeof(struct sockaddr_in));
+                uint8_t datafrom[128]={0};
+	        ret=recvfrom(sock, datafrom, 128, 0, (struct sockaddr*)&addrfrom, &nlen);
+                coap_pdu_t *pdu = coap_pdu_init(0, 0, 0,128);
+                if(ret > 0 && coap_pdu_parse(COAP_PROTO_UDP,datafrom,128,pdu)){
+                    uint8_t *pdudata = NULL;
+                    size_t pdudata_len = 0;
+                    coap_get_data(pdu,&pdudata_len,&pdudata);
+                    if(pdudata && 0 < pdudata_len){
+		        //printf("%s\n",pdudata);
+                        if(strstr(pdudata,"\"searchAck\":\"ANDLINK-GW\"")){
+                            uint8_t ip[24] = {0}; 
+                            inet_ntop(AF_INET, &addrfrom.sin_addr, ip, sizeof(ip));
+		            printf("%s\n",ip);
+                        }
+                    }
+                }
+                coap_delete_pdu(pdu);
 	}
 	return 0;
 }
@@ -139,7 +173,8 @@ static int broadcast_send(const char *addr,const int port,char *data,uint32_t da
 coap_pdu_t *broadcast_pdu(str *uri_path,str *data){
     uint16_t tid=0;
     prng((uint8_t*)&tid,sizeof(tid));
-    coap_pdu_t * pdu=coap_pdu_init(COAP_MESSAGE_NON,COAP_REQUEST_POST,tid,4096);
+    //coap_pdu_t * pdu=coap_pdu_init(COAP_MESSAGE_NON,COAP_REQUEST_POST,tid,4096);
+    coap_pdu_t * pdu=coap_pdu_init(g_coap_message,COAP_REQUEST_POST,tid,512);
     uint8_t _buf[128]={0};
     uint8_t *buf = _buf;
     size_t buflen = 128;
@@ -164,10 +199,13 @@ int main(int argc,char *argv[]){
     str payload={0,NULL};
     coap_uri_t uri;
     int opt;
-    while ((opt = getopt(argc, argv, "e:")) != -1) {
+    while ((opt = getopt(argc, argv, "Ne:")) != -1) {
         switch (opt) {
         case 'e':
             if (!cmdline_input(optarg, &payload));
+            break;
+        case 'N':
+            g_coap_message = COAP_MESSAGE_NON;
             break;
         default:
             usage(argv[0]);

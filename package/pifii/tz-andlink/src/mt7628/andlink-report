@@ -47,6 +47,10 @@ local D = log_info
 --log end
 
 --common
+function sleep(n)
+   require("socket").select(nil, nil, n)
+end
+
 function split(str, delimiter)
     local fs = delimiter
     if not fs or "" == string.gsub(fs," ","") then
@@ -114,10 +118,15 @@ function get_broadcast(ip,mask)
 end
 
 function get_sn(mac)
-    mac = string.gsub(mac,":","")
-    local mh = string.sub(mac,1,6)
-    local mt = string.sub(mac,7,12)
-    return string.format("%08dA%08d",tonumber(mh,16),tonumber(mt,16))
+    local sn = util.exec([[test -f /usr/bin/sncfg && sncfg -r | tr -d "\n"]])
+    if sn and "" ~= sn then
+        return sn
+    else
+        mac = string.gsub(mac,":","")
+        local mh = string.sub(mac,1,6)
+        local mt = string.sub(mac,7,12)
+        return string.format("%08dA%08d",tonumber(mh,16),tonumber(mt,16))
+    end
 end
 
 function get_mac()
@@ -145,14 +154,15 @@ function get_online_data()
     if not devid or "" == devid then
         return nil
     end
-    local sm=util.exec([[cat /tmp/sysinfo/board_name | tr -d "\n"]]) or ""
+    --local sm=util.exec([[cat /tmp/sysinfo/board_name | tr -d "\n"]]) or ""
     local sv=util.exec([[cat /etc/openwrt_version | tr -d "\n|\r"]])
     local devmac = get_mac()
     local d = {
               deviceId = devid,
               deviceMac = devmac,
               deviceType = uci:get("andlink","andlink","devicetype") or "30932", 
-              firmwareVersion = sm.."_"..sv,--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
+              --firmwareVersion = sm.."_"..sv,--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
+              firmwareVersion = sv,--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
               softwareVersion = sv,--util.exec([[grep soft_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
               ipAddress = get_device_ip(),
               timestamp = os.time(),
@@ -168,28 +178,36 @@ function get_online_data()
     return d 
 end
 
-function device_register()
-    local gwip=nil
-    local recv_data=nil; 
-    local recv_t=nil; 
-    --send broadcast pack, search gateway
+function search_gateway()
+    local count = 1 
     local bcip = nil
     local bc_cmd = nil
-    while(not gwip or "" == gwip) do
+    local gwip = nil
+    while not gwip or "" == gwip do
         _,bcip = get_device_ip()
         if not bcip then bcip = "255.255.255.255" end
-        bc_cmd=string.format([[coap-broadcast coap://%s/qlink/searchgw -e '{"searchKey":"ANDLINK-DEVICE","andlinkVersion":"V2"}']],bcip)
-        D(bc_cmd)
-        res=util.exec(bc_cmd)
-        os.execute([[sleep 5]]);
-        uci:load("andlink")
-        gwip=uci:get("andlink","andlink","gateway")
-        if gwip and "" ~= gwip then
+        bc_cmd=string.format([[coap-broadcast coap://%s/qlink/searchgw -e '{"searchKey":"ANDLINK-DEVICE","andlinkVersion":"V3"}']],bcip)
+        gwip=util.exec(bc_cmd)
+        gwip=string.gsub(gwip,"\n","")
+        if check_ip(gwip) then
+            uci:load("andlink")
+            uci:set("andlink","andlink","gateway",gwip)
+            uci:commit("andlink")
             D("get gateway ip:"..gwip)
             break
+        else
+           gwip = nil
         end
-        os.execute([[sleep 30]]);
+        count = count + 1
+        if count > 6 then break end
+        sleep(5)
     end
+    return gwip
+end
+function coap_device_register(gwip)
+    if not gwip then return nil end
+    local recv_data=nil; 
+    local recv_t=nil; 
     --device register 
     --if not devid or "" == devid then
         local dt=uci:get("andlink","andlink","devicetype") or "30932"
@@ -226,47 +244,38 @@ function device_register()
     --end 
 end
 
-function main()
-    local res=nil
-    local hb_time=nil
+--online
+function coap_send_online(gwip)
+    if not gwip then return false end
     local recv_data=nil
-    local recv_t=nil; 
- 
-    local gwip=nil
-    local devid=nil
-    uci:load("andlink")
-    gwip=uci:get("andlink","andlink","gateway")
-    devid = uci:get("andlink","andlink","device_id")  
-    while true do
-        if not gwip or "" == gwip or not devid or "" == devid then 
-            device_register()
-            gwip=uci:get("andlink","andlink","gateway")
-        end
-        
-        --online
-        local od = get_online_data()
-        if not od then
-            D("error:get online data failed!")
-            return -1 
-        end
-        local str_od = json.encode(od)
-        local online_cmd=string.format([[coap-client coap://%s/device/inform/boot -B 5 -m POST -e '%s']],gwip,str_od);
-        D(online_cmd)
-        recv_data = util.exec(online_cmd) 
-        if recv_data and "" ~= recv_data then
-           D(recv_data)
-           recv_t = json.decode(recv_data) 
-           if recv_t and recv_t["timestamp"] and recv_t["heartBeatTime"] then
-               hb_time = tonumber(recv_t["heartBeatTime"])
-               uci:set("andlink","andlink","heartbeat_time",hb_time) 
-               break
-           end
-        end
-        gwip = nil --register again
-        os.execute("sleep 16") 
+    local recv_t=nil
+    local od = get_online_data()
+    if not od then
+        D("error:get online data failed!")
+        return false 
     end
+    local str_od = json.encode(od)
+    local online_cmd=string.format([[coap-client coap://%s/device/inform/boot -B 5 -m POST -e '%s']],gwip,str_od);
+    D(online_cmd)
+    recv_data = util.exec(online_cmd) 
+    if recv_data and "" ~= recv_data then
+       D(recv_data)
+       recv_t = json.decode(recv_data) 
+       if recv_t and recv_t["timestamp"] and recv_t["heartBeatTime"] then
+           hb_time = tonumber(recv_t["heartBeatTime"])
+           uci:set("andlink","andlink","heartbeat_time",hb_time) 
+           uci:commit("andlink") 
+           return true 
+       end
+    end
+    return false
+end
 
-    --sysupgrade event 
+--sysupgrade event 
+function coap_sysupgrade_event(gwip)
+    if not gwip then return nil end
+    local recv_data=nil
+    local recv_t=nil
     local ev=uci:get("andlink","event","preversion")
     if ev and "" ~= ev then
         local sv=util.exec([[cat /etc/openwrt_version | tr -d "\n|\r"]])
@@ -285,14 +294,21 @@ function main()
             end
         end
     end
+end
 
-    --heartbeat 
+--heartbeat 
+function coap_send_heartbeat(gwip)
+    if not gwip then return nil end
+    local recv_data=nil
+    local recv_t=nil
     local str_hb = nil --json.encode(hb)
     local hb_cmd = nil--string.format([[coap-client coap://%s/device/inform/heartbeat -m POST -e '%s']],gwip,str_hb);
     local hb_count = 0
+    local hb_time = uci:get("andlink","andlink","heartbeat_time")
+    if not hb_time then return nil end
     while true do
         uci:load("andlink")
-        gwip=uci:get("andlink","andlink","gateway") --must get gateway addr agin
+        gwip = uci:get("andlink","andlink","gateway") --must get gateway addr agin
         devid = uci:get("andlink","andlink","device_id") --must get device id again 
         if not gwip or "" == gwip or not devid or "" == devid then 
             D("device was unbound")
@@ -302,20 +318,49 @@ function main()
         hb_cmd=string.format([[coap-client coap://%s/device/inform/heartbeat -B 2 -m POST -e '%s']],gwip,str_hb);
         D(hb_cmd)
         recv_data = util.exec(hb_cmd)
-        if recv_data then
+        recv_data = string.gsub(recv_data," ","")
+        if recv_data and "" ~= recv_data then
             D(recv_data)
             recv_t = json.decode(recv_data)
-            if (not recv_t or 1 ~= tonumber(recv_t["respCode"])) then
+            if not recv_t or 1 ~= tonumber(recv_t["respCode"]) then
                 if 10 < hb_count then 
                     break
                 else
                     hb_count = hb_count + 1
-                end 
+                end
+            else
+                hb_count = 0
             end
         end
-        os.execute("sleep "..(hb_time/1000)) 
+        sleep(hb_time/1000)
     end
-    --heart beat
 end
 
-main()
+function coap_report(gwip)
+    local devid=nil
+    uci:load("andlink")
+    devid = uci:get("andlink","andlink","device_id")
+    while true do
+        --device register
+        if not devid or "" == devid then 
+            coap_device_register(gwip)
+            devid = uci:get("andlink","andlink","device_id")  
+        end
+        --online
+        if coap_send_online(gwip) then break end
+        devid = nil
+    end
+
+    --sysupgrade event 
+    coap_sysupgrade_event(gwip)
+
+    --heart beat
+    coap_send_heartbeat(gwip)
+end
+
+local gwip = nil
+while true do
+    gwip = search_gateway()
+    if gwip then coap_report(gwip) end
+    sleep(30)
+end

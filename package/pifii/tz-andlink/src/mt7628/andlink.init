@@ -9,11 +9,13 @@ start(){
         service_start $ser
         sleep 5
         $rep &
+	andlink-macfilter
 }
 
 stop(){
         service_stop $ser 
         killall andlink-report
+	andlink-macfilter -c
 }
 
 restart(){

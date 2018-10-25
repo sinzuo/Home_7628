@@ -172,7 +172,15 @@ function wifi_sync(data,client)
                          local disa = tonumber(c["Enable"])
                          if 0 == disa then disa = 1 else disa = 0 end
                          local enc = c["SecurityMode"]
-                         if "None" == enc or "none" == enc then enc = "none" else enc = "psk+psk2" end
+                         if "None" == enc or "none" == enc then
+                             enc = "none"
+                         elseif "WPA-Personal" == enc then
+                             enc = "psk"
+                         elseif "WPA2-Personal" == enc then
+                             enc = "psk2"
+                         else
+                             enc = "psk+psk2"
+                         end
                          local hidd = tonumber(c["SSIDAdvertisementEnabled"])
                          if 0 == hidd then hidd = 1 else hidd = 0 end 
                          if not name then 
@@ -351,7 +359,7 @@ function wps(data,client)
    print(res)
 end
 
-function mac_filter(data,client)
+function mac_filter_wifi(data,client)
    local res = [[{"respCode":1}]]
    local d = json.decode(data)
    local devid = uci:get(andlk,"andlink","device_id") or ""
@@ -437,6 +445,69 @@ function mac_filter(data,client)
    print(res)
 end
 
+function mac_filter(data,client)
+   local res = [[{"respCode":1}]]
+   local d = json.decode(data)
+   local devid = uci:get(andlk,"andlink","device_id") or ""
+   if d and d["deviceId"] and d["data"] and d["deviceId"] == devid
+     and d["data"]["MacFilterEnable"] and d["data"]["MacFilterPolicy"]
+     and d["data"]["MacFilterEntries"] then
+       local save_flag = false
+       local ena = tonumber(d["data"]["MacFilterEnable"])
+       local pol = tonumber(d["data"]["MacFilterPolicy"])
+       repeat
+           if 1 == ena and 0 ~= pol and 1 ~= pol then
+               res = [[{"respCode":1003,"respCont":"Invalid value"}]]
+               break
+           end
+           local es = d["data"]["MacFilterEntries"]
+           if 1 == ena then
+               local est = split(es,",")
+               local ml = nil
+               local m = nil
+               local ismac = true
+               for _,v in pairs(est) do
+                   m = string.match(v,"^[%x][%x]:[%x][%x]:[%x][%x]:[%x][%x]:[%x][%x]:[%x][%x]")
+                   if not m then
+                       ismac = false
+                       break
+                   end
+               end
+               if not ismac then
+                   res = [[{"respCode":1003,"respCont":"Invalid value"}]]
+                   break
+               end
+               if not uci:get(andlk,"MacFilter") then
+                   uci:section(andlk,"MacFilter","MacFilter")
+               end
+               uci:set(andlk,"MacFilter","MacFilterEnable",1)
+               uci:set(andlk,"MacFilter","MacFilterPolicy",pol)
+               uci:set(andlk,"MacFilter","MacFilterEntries",es)
+               uci:commit(andlk)
+               save_flag = true
+           elseif 0 == ena then
+               if not uci:get(andlk,"MacFilter") then
+                   uci:section(andlk,"MacFilter","MacFilter")
+               end
+               uci:set(andlk,"MacFilter","MacFilterEnable",0)
+               uci:set(andlk,"MacFilter","MacFilterPolicy",pol)
+               uci:set(andlk,"MacFilter","MacFilterEntries",es)
+               uci:commit(andlk)
+               save_flag = true
+           else
+               res = [[{"respCode":1003,"respCont":"Invalid value"}]]
+               break
+           end
+       until true
+       if save_flag then
+           os.execute([[andlink-macfilter]])
+       end
+   else
+       res = [[{"respCode":1002,"respCont":"Lock of argument"}]]
+   end
+   print(res)
+end
+
 function reboot(data,client)
    local res = [[{"respCode":1}]]
    local d = json.decode(data)
@@ -513,6 +584,7 @@ function ap_config_info(data,client)
     if "" ~= devid then
         local led = util.exec([[test -f /sys/class/leds/wifi/brightness && cat /sys/class/leds/wifi/brightness | tr -d "\n|\r"]])
         led = tonumber(led) or 1
+        if 1 < led then led = 1 end
         local d={
         hardwareVersion = "1.0.1",--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
         softwareVersion = util.exec([[cat /etc/openwrt_version | tr -d "\n|\r"]]),--util.exec([[grep soft_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
@@ -522,7 +594,7 @@ function ap_config_info(data,client)
         MacFilterEntries = uci:get(al,"MacFilter","MacFilterEntries") or "",
         LEDOnOff = led,
         RoamingSwitch = 0,
-        SyncCode = uci:get(al,"andlink","sync_code") or "",
+        SyncCode = uci:get(al,"andlink","sync_code") or "0",
         }
         local rs = {}
         local r2 = uci:get(wire,"ra0")
@@ -579,8 +651,12 @@ function ap_config_info(data,client)
                     v["MaxAssociateNum"] = tonumber(s["maxassoc"]) or 10
                     if "none" == s["encryption"] then
                         v["SecurityMode"] = "None"
-                    else 
-                        v["SecurityMode"] = "WPA-WPA2-Personal"
+                    elseif "psk" == s["encryption"] then
+                        v["SecurityMode"] = "WPA-Personal"
+                    elseif "psk2" == s["encryption"] then
+                        v["SecurityMode"] = "WPA2-Personal"
+                    else
+                        v["SecurityMode"] = "MIXED-WPAPSK2"
                     end
                     if "ra0" == dev then
                         v["Radio"] = "2.4G" 
@@ -836,11 +912,12 @@ function data_process(data,client)
    local c = json.decode(client)
    local devid = uci:get(andlk,"andlink","device_id") or ""
    if d and d["deviceId"] and d["deviceId"] == devid then
-       local sm=util.exec([[cat /tmp/sysinfo/board_name | tr -d "\n"]]) or ""
+       --local sm=util.exec([[cat /tmp/sysinfo/board_name | tr -d "\n"]]) or ""
        local sv=util.exec([[cat /etc/openwrt_version | tr -d "\n|\r"]])
        local ps={}
        local sd = {
-                firmware = sm.."_"..sv,
+                --firmware = sm.."_"..sv,
+                firmware = sv,
                 softVersion = sv,
        }
        if d["data"] and d["data"]["paramCodes"] then

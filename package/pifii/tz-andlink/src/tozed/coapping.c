@@ -96,7 +96,7 @@ static int ping_send(const char *addr,const int port,char *data,uint32_t datalen
 		printf("socket error\n");
 		return -1;
 	}   
-        struct timeval timeout = {5,0};
+        struct timeval timeout = {3,0};
         //wait for 3s
         if( setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout) ) < 0 )
         {    
