@@ -124,6 +124,7 @@ function search_ack(data,client)
                 if not uci:get(andlk,"andlink") then
                     uci:section(andlk,"andlink","andlink")
                 end
+                c["ip"]=string.gsub(c["ip"],"::ffff:","") --ipv6 map ipv4
                 uci:set(andlk,"andlink","gateway",c["ip"])
                 uci:commit(andlk)
                 res = [[{"respCode":1}]]
@@ -141,7 +142,7 @@ function wifi_sync(data,client)
     if d and d["deviceId"] and d["data"] and d["data"]["SyncCode"]
       and d["data"]["Configurations"] and d["deviceId"] == devid then
         local sc = uci:get(andlk,"andlink","sync_code") or ""
-        if sc ~= d["data"]["SyncCode"] then
+        --if sc ~= d["data"]["SyncCode"] then
              local save_flag = false
              local wifa="wifi-iface"
              for k,c in pairs(d["data"]["Configurations"]) do
@@ -219,7 +220,7 @@ function wifi_sync(data,client)
                  res = [[{"respCode":1}]]
                  os.execute([[wifi >/dev/null 2>&1 &]])
              end
-        end
+        --end
     else 
         res = [[{"respCode":1002,"respCont":"Lock of argument"}]]
     end 
@@ -625,6 +626,7 @@ function ap_config_info(data,client)
         if r2 or r5 then
             local i2 = 1
             local i5 = 1
+            local disa = 0 
             uci:foreach(wire,"wifi-iface",function(s)
                 local dev  = s["device"] or ""  
                 local net  = s["network"] or ""
@@ -634,8 +636,10 @@ function ap_config_info(data,client)
                 if ("ra0" == dev or "radio0" == dev) and "lan" == net
                   and "ap" == mode and "tozed-zhongji" ~= ssid then
                     local v = {}
+                    
+                    disa = tonumber(uci:get(wire,dev,"disabled")) or 0
                     v["Enable"] = tonumber(s["disabled"]) or 0
-                    if 0 == v["Enable"] then 
+                    if 0 == v["Enable"] and 0 == disa then
                         v["Enable"] = 1 
                     else 
                         v["Enable"] = 0 

@@ -129,9 +129,21 @@ function get_sn(mac)
     end
 end
 
+--function get_mac()
+--    local mac=util.exec([[dd bs=1 skip=4 count=6 if=/dev/mtdblock2 2>/dev/null | hexdump -vC|grep 00000000|awk '{printf("%s",toupper($2$3$4$5$6$7))}']]);
+--    return mac
+--end
+
 function get_mac()
-    local mac=util.exec([[dd bs=1 skip=4 count=6 if=/dev/mtdblock2 2>/dev/null | hexdump -vC|grep 00000000|awk '{printf("%s",toupper($2$3$4$5$6$7))}']]);
-    return mac  
+    local ifa = util.ubus("network.interface.lan","status")
+    local mac = nil
+    if ifa and "dhcp" ~= ifa.proto then --router mode
+        ifa = util.ubus("network.interface.wan","status")
+    end
+    if ifa and ifa["device"] then
+        mac = util.exec(string.format([[ifconfig %s | grep HWaddr | awk '{print $5}' | tr ':|\n']],ifa["device"]))
+    end
+    return mac
 end
 
 function get_device_ip()
@@ -159,7 +171,7 @@ function get_online_data()
     local devmac = get_mac()
     local d = {
               deviceId = devid,
-              deviceMac = devmac,
+              --deviceMac = devmac,
               deviceType = uci:get("andlink","andlink","devicetype") or "30932", 
               --firmwareVersion = sm.."_"..sv,--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
               firmwareVersion = sv,--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
@@ -167,12 +179,13 @@ function get_online_data()
               ipAddress = get_device_ip(),
               timestamp = os.time(),
               XData = {
+                      deviceMac = devmac,
                       deviceVendor = "SZTozed",
                       deviceModel = uci:get("andlink","andlink","devicemodel") or "ZY366TZ",
                       deviceSn = get_sn(devmac), --"C170710010116021863",
-                      apUplinType = "Ethernet",
+                      apUplinkType = "Ethernet",
                       radio5 = 0,
-                      syncCode = uci:get("andlink","andlink","sysc_code") or "0"
+                      SyncCode = uci:get("andlink","andlink","sysc_code") or "0"
               }
     }
     return d 
@@ -187,6 +200,7 @@ function search_gateway()
         _,bcip = get_device_ip()
         if not bcip then bcip = "255.255.255.255" end
         bc_cmd=string.format([[coap-broadcast coap://%s/qlink/searchgw -e '{"searchKey":"ANDLINK-DEVICE","andlinkVersion":"V3"}']],bcip)
+        D(bc_cmd)
         gwip=util.exec(bc_cmd)
         gwip=string.gsub(gwip,"\n","")
         if check_ip(gwip) then
@@ -196,7 +210,18 @@ function search_gateway()
             D("get gateway ip:"..gwip)
             break
         else
-           gwip = nil
+            bc_cmd=string.format([[coap-broadcast coap://%s/qlink/searchgw -N -e '{"searchKey":"ANDLINK-DEVICE","andlinkVersion":"V3"}']],bcip)
+            D(bc_cmd)
+            os.execute(bc_cmd)
+            sleep(3)
+            uci:load("andlink")
+            gwip = uci:get("andlink","andlink","gateway")
+            if check_ip(gwip) then
+                D("get gateway ip:"..gwip)
+                break 
+            else
+                gwip = nil
+            end
         end
         count = count + 1
         if count > 6 then break end

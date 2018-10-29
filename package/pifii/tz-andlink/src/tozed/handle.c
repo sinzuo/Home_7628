@@ -363,14 +363,20 @@ resources_process_handle(coap_context_t *ctx UNUSED_PARAM,
         path[uri_path->length] = 0;
 
         char *client_info = NULL;
-        char client_addr[16]={0};
+        char client_addr[64]={0};
         uint16_t client_port;
+        debug("AF=%d,fam=%d\n",AF_INET,session->remote_addr.addr.sa.sa_family);
         if (AF_INET == session->remote_addr.addr.sa.sa_family){
             inet_ntop(AF_INET, &session->remote_addr.addr.sin.sin_addr, 
                                         client_addr, sizeof(client_addr));
             client_port = ntohs(session->remote_addr.addr.sin.sin_port);
         }
-        /*else if (AF_INET6 == session->remote_addr.addr.sa.sa_family){}*/
+        else if (AF_INET6 == session->remote_addr.addr.sa.sa_family){
+            inet_ntop(AF_INET6, &session->remote_addr.addr.sin6.sin6_addr, 
+                                        client_addr, sizeof(client_addr));
+            client_port = ntohs(session->remote_addr.addr.sin6.sin6_port);
+
+        }
         //if(0 != memcmp("device/command/file",path,min(strlen(path),19))){
             asprintf(&client_info,"{\"ip\":\"%s\",\"port\":\"%d\"}",
                                    client_addr,client_port);
