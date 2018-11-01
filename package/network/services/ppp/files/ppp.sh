@@ -86,12 +86,11 @@ ppp_generic_setup() {
 	local localip
 
 	json_get_vars ipv6 demand keepalive keepalive_adaptive username password pppd_options pppname unnumbered
-	
-	if [  "$ipv6" = 1 ]; then
+	if [ "$ipv6" = 0 ]; then
+		ipv6=""
+	elif [ -z "$ipv6" -o "$ipv6" = auto ]; then
 		ipv6=1
 		autoipv6=1
-		
-	
 	fi
 
 	if [ "${demand:-0}" -gt 0 ]; then
