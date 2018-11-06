@@ -1,0 +1,495 @@
+#!/usr/bin/lua
+
+local json = require("luci.json")
+local util = require ("luci.util")
+require "luci.model.uci"
+local uci = luci.model.uci.cursor()
+
+local andlk = "andlink"
+local wire  = "wireless"
+--log 
+local log_file = "/tmp/tzqlink.log"
+local log_flag = nil -- nil:don't print log,0:print log to file,1: print log to stdout 
+local log_max = 5000 --max line num
+
+function log_info(info)
+    if log_flag then
+        clean_log()
+        if not info then info = " " end 
+        if "table" == type(info) then info = json.encode(info) end
+        local str_time = os.date("%Y-%m-%d %H:%M:%S",os.time())
+        if 0 == log_flag + 0 then
+            local lf = io.open(log_file, "a+")
+            io.output(lf)
+            io.write(string.format([[%s -->> %s%s]],str_time,string.gsub(info,"\n",""),"\n"))
+            io.close(lf)
+            --os.execute("echo \'"..str_time.." -->> "..info.."\' >> "..log_file)
+        else
+            print(str_time.." -->> "..info)
+        end 
+    end 
+end
+
+function clean_log()
+    if log_file then
+        if 0 == os.execute("test -f "..log_file) then
+            local function exec(command)
+                local pp   = io.popen(command)
+                local data = pp:read("*a")
+                pp:close()
+                return data
+            end
+            local num = exec("wc -l "..log_file.." 2>&1 | awk \'{print $1}\' ")
+            num = tonumber(num) or 1
+            if log_max <= num + 0 then
+               os.execute("echo -n \' \' > "..log_file)
+            end 
+        end 
+    end 
+end
+local D = log_info 
+--log end
+
+--common
+function split(str, delimiter)
+    local fs = delimiter
+    if not fs or "" == string.gsub(fs," ","") then
+                fs="%s"
+        end 
+    if str==nil or str=="" or delimiter==nil then
+        return nil 
+    end 
+    local result = {}
+        for match in string.gmatch((str..delimiter),"[^"..fs.."]+") do
+        table.insert(result, match)
+    end 
+    return result
+end
+
+local function getinfacestatus(inf,param,index) 
+    local arg_t = {inf=inf,param=param}
+    if arg_t and arg_t["inf"] and arg_t["param"] then
+        local ifa = util.ubus(string.format("network.interface.%s",arg_t["inf"]),"status")
+        if ifa then
+            local p = arg_t["param"]
+            if "ipv4-address" == p then
+                if ifa[p] and ifa[p][1] then
+                    local res = ifa[p][1]["address"] or ""
+                    return res
+                end 
+            elseif "dns-server" == p then
+                if index and ifa[p] and ifa[p][index] then
+                    return ifa[p][index]
+                end 
+            elseif "nexthop" == p then
+                if ifa["route"] and ifa["route"][2] then
+                    local res = ifa["route"][2][p] or ""
+                    return res
+                elseif ifa["route"] and ifa["route"][1] then
+                    local res = ifa["route"][1][p] or ""
+                    return res
+                end
+            elseif "mac" == p then
+                local cmd = string.format([[ifconfig %s | grep HWaddr | awk '{print $5}' | tr -d '\n']],ifa["device"])
+                return util.exec(cmd)
+            elseif "netmask" == p then
+                local cmd = string.format([[ifconfig %s | grep Mask | awk -F: '{print $4}' | tr -d '\n']],ifa["device"])
+                return util.exec(cmd)
+            else
+                if ifa[p] and "table" ~= type(ifa[p]) then
+                    return ifa[p]
+                end 
+            end 
+        end 
+    end
+end
+function get_net()
+    local net="wan"
+    local lanproto=getinfacestatus("lan","proto")
+    if "dhcp" == lanproto then
+        net="lan"
+    end
+    return net
+end
+function get_ip()
+    return getinfacestatus(get_net(),"ipv4-address")
+end
+function get_mac()
+   return string.gsub(getinfacestatus(get_net(),"mac"),":","")
+end
+function sleep(n)
+   require("socket").select(nil, nil, n)
+end
+--get_channel()
+local function get_hidden_signal_channel()
+    local ret = {}
+    local cht = {}
+    local count = 20
+    while true do
+    os.execute([[iwpriv ra0 set SiteSurvey=1]])
+    local fd = io.popen([[iwpriv apcli0 get_site_survey | grep -E "BSSID|[0-9a-f][0-9a-f]   NONE"]])
+    local header = fd and fd:read("*l")
+    header = header and header:gsub("[^%w-]", " ")
+    if header then
+        local ssid_pos, ssid_end
+        ssid_pos = header:find("SSID")
+        ssid_end = header:find("BSSID") - 1
+        while true do
+            local line = fd:read("*l")
+            if not line or #line<=0 then break end
+
+            local channel = tonumber(line:match("^%d+"))
+            local ssid = line:sub(ssid_pos, ssid_end)
+            local space_start = ssid:find(" *$")
+            ssid = ssid:sub(1, space_start-1)
+            local bssid, security, siganl, mode =
+                    line:sub(ssid_end):match("([%x:]+) +([%w/]+) +(%d+) +([%w/]+)")
+            if ssid:match("^0x") then
+                ssid = ssid:sub(3):gsub("%x%x", function(e)
+                            return string.char(tonumber(e,16))
+                        end)
+            end
+            --print(channel, ssid, bssid, security, siganl, mode)
+            if "" == string.gsub(ssid," ","") then
+                ret[ssid] = {
+                    security = security,
+                    siganl = tonumber(siganl),
+                    channel = tonumber(channel),
+	            ssid = ssid,
+	            bssid = bssid,
+	            mode = mode,
+                }
+                D(ret)
+                --D(channel)
+                table.insert(cht,channel)
+            end
+        end
+        fd:close()
+    end
+    if 0 < #cht or 0 > count then
+        break
+    end
+    sleep(1)
+    count = count - 1
+    end
+    return cht
+end
+function search_channel2()
+    local cht = {}
+    local apinfo=nil
+    local ip=nil
+    local flag=false
+    local count=4
+    while true do
+        cht = get_hidden_signal_channel()
+        for _,v in pairs(cht) do
+            os.execute(string.format("iwpriv ra0 set Channel=%s",v))
+            sleep(2)
+            apinfo=util.exec([[iwinfo apcli0 i | grep -E "ESSID|Access Point|Bit Rate|Mode: Client" | tr -d '\n' | awk '{print $3" "$6" "$10" "$15}']])
+            ap=split(apinfo," ")
+            if "unknown" ~= ap[1] and "00:00:00:00:00:00" ~= ap[2] then
+                D("got a channel")
+                sleep(5)
+                local pingcmd="coap-ping -t 1 coap://192.168.1.1"
+                local pingres=util.exec(pingcmd)
+                D(pingcmd)
+                D(pingres)
+                if string.find(pingres,"reply from 192.168.1.1") then
+                    ip=get_ip()
+                    if ip and "" ~= ip then
+                       D("QLINK connected")
+                       flag = true
+                       break
+                    end
+                end
+            end
+        end
+        if 0 > count or flag then break end
+        count = count - 1
+    end
+    if flag then
+        local d={ deviceType = uci:get("andlink","andlink","devicetype") or "30103",
+                  ipAddress = ip,
+                  deviceId = get_mac(),
+              }
+        local str_json = json.encode(d)
+        local cmd=string.format([[coap-client coap://192.168.1.1/qlink/request -m post -B 3 -e '%s']],str_json)
+        local res=nil
+        count=5
+        while true do
+            D(cmd)
+            res=json.decode(util.exec(cmd))
+            D(res)
+            if res and 1 == res["result"] then
+                break
+            end
+            count = count - 1
+            if 0 > count then os.exit() end
+            sleep(2)
+        end
+    end
+end
+
+function search_channel()
+    local apinfo=nil
+    local ap=nil
+    local ch = 1
+    local count=26 --13 * 2
+    local flag = false
+
+    while true do
+        apinfo=util.exec([[iwinfo apcli0 i | grep -E "ESSID|Access Point|Bit Rate|Mode: Client" | tr -d '\n' | awk '{print $3" "$6" "$10" "$15}']])
+        ap=split(apinfo," ")
+        ch=tonumber(ap[3])
+        if "unknown" ~= ap[1] and "00:00:00:00:00:00" ~= ap[2] then
+           D("got a channel")
+           flag = true
+           break 
+        end
+        if ch + 2 <= 13 then
+            ch = ch + 2
+        else
+            if ch % 2 == 0 then ch = 1  else ch = 2  end 
+        end 
+        D(ch)
+        if count < 0 then break end
+        count = count - 1
+        os.execute(string.format("iwpriv ra0 set Channel=%d",ch))
+        sleep(2)
+    end
+    if not flag then
+        return nil 
+    end
+    flag = false
+    sleep(4)
+    local net="wan"
+    local lanproto=getinfacestatus("lan","proto")
+    if "dhcp" == lanproto then 
+        net="lan"
+    end
+    local ip = nil
+    repeat 
+        local pingcmd="coap-ping -t 1 coap://192.168.1.1"
+        local pingres=util.exec(pingcmd)
+        D(pingcmd)
+        D(pingres)
+        if string.find(pingres,"reply from 192.168.1.1") then
+            ip=getinfacestatus(net,"ipv4-address")
+            if ip and "" ~= ip then
+               D("QLINK connected")
+               flag = true
+               break
+            end
+        end
+        local chs=nil
+        if 1 == ch then 
+            chs = {2,1} 
+        elseif 13 == ch then 
+            chs = {12,13} 
+        else
+            chs = {ch-1, ch+1, ch}
+        end
+        for _,v in pairs(chs) do 
+            os.execute(string.format("iwpriv ra0 set Channel=%d",v))
+            sleep(5)
+            pingres=util.exec(pingcmd)
+            D(pingcmd)
+            D(pingres)
+            if string.find(pingres,"reply from 192.168.1.1") then
+                ip=getinfacestatus(net,"ipv4-address")
+                if ip and "" ~= ip then
+                   D("QLINK connected")
+                   flag = true
+                   break
+                end
+            end
+        end
+    until true
+    if flag then
+        local d={ deviceType = uci:get("andlink","andlink","devicetype") or "30103",
+                  ipAddress = ip,  
+                  deviceId = string.gsub(getinfacestatus(net,"mac"),":",""),
+              }
+        local str_json = json.encode(d)
+        local cmd=string.format([[coap-client coap://192.168.1.1/qlink/request -m post -B 3 -e '%s']],str_json)
+        local res=nil
+        count=5
+        while true do
+            D(cmd)
+            res=json.decode(util.exec(cmd))
+            D(res)
+            if res and 1 == res["result"] then
+                break
+            end
+            count = count - 1
+            if 0 > count then os.exit() end
+            sleep(2)
+        end
+    end
+end
+
+--common
+function set_qlink()
+    local name=nil
+    uci:foreach(wire,"wifi-iface",function(s)
+        if "sta" == s["mode"] then
+            name = s[".name"]
+        end 
+    end)
+    local net="wan"
+    local lanproto=getinfacestatus("lan","proto")
+    if "dhcp" == lanproto then 
+        net="lan"
+    end
+    if name then
+        uci:set(wire,name,"ssid","CMCC-QLINK")
+        uci:set(wire,name,"encryption","none") 
+        uci:set(wire,name,"network",net) 
+    else
+        uci:section(wire,"wifi-iface",nil,{device="ra0",network=net,mode="sta",ssid="CMCC-QLINK",encryption="none"})
+    end
+    uci:commit(wire)
+    local apcli = util.exec([[ifconfig | grep apcli0 | awk '{print $1}']])
+    if "" ~= apcli then
+        local cmd=[[iwpriv apcli0 set ApCliEnable=0;iwpriv apcli0 set ApCliAuthMode=OPEN;iwpriv apcli0 set ApCliEncrypType=NONE;iwpriv apcli0 set ApCliSsid=CMCC-QLINK;iwpriv apcli0 set ApCliEnable=1]]
+        os.execute(cmd)
+        D("set_qlink:apcli0")
+    else
+        os.execute("wifi >/dev/null 2>&1 &")
+        D("set_qlink")
+    end
+end
+
+function Qlink_ackQlinkNetinfo()
+    local apinfo=nil
+    local ap=nil
+    local count=10
+    local flag=false
+    while true do
+        apinfo=util.exec([[iwinfo apcli0 i | grep -E "ESSID|Access Point|Bit Rate|Mode: Client" | tr -d '\n' | awk '{print $3" "$6" "$10" "$15}']])
+        ap=split(apinfo," ")
+        if "unknown" ~= ap[1] and "00:00:00:00:00:00" ~= ap[2] then
+            flag = true 
+            break 
+        end
+        if count < 0 then return false end
+        count = count - 1
+        sleep(2)
+    end
+    if flag then
+        local devid={}
+        local lanproto=getinfacestatus("lan","proto")
+        if "dhcp" == lanproto then
+            devid = getinfacestatus("lan","mac")
+        else
+            devid = getinfacestatus("wan","mac")
+        end
+        devid = string.gsub(devid,":","")
+        local str_json = json.encode({deviceId=devid})
+        local cmd=string.format([[coap-client coap://192.168.1.1/qlink/success -m post -B 3 -e '%s']],str_json)
+        local res=nil
+        count=3
+        while true do
+            D(cmd)
+            res=json.decode(util.exec(cmd))
+            if res and 1 == res["result"] then
+                break
+            end
+            count = count - 1
+            if 0 > count then os.exit() end
+            sleep(2)
+        end
+    end 
+end
+
+function set_gateway_netinfo(d)
+    if d and d["SSID"] and d["password"] and d["encrypt"] and d["channel"] then
+        local ssid = d["SSID"] 
+        local pwd = d["password"] 
+        local encmode = d["encrypt"] 
+        local ch = d["channel"] 
+        local name=nil
+        uci:foreach(wire,"wifi-iface",function(s)
+            if "sta" == s["mode"] then
+                name = s[".name"]
+            end
+        end)
+        local net="wan"
+        local lanproto=getinfacestatus("lan","proto")
+        if "dhcp" == lanproto then 
+            net="lan"
+        end
+        if name then
+            uci:set(wire,"ra0","channel",ch)
+            uci:set(wire,name,"ssid",ssid)
+            uci:set(wire,name,"network",net) 
+            --OPEN/WEP/WPAPSK/WPAPSK2/MIXED-WPAPSK2
+            local function get_enc(s)
+                if "MIXED-WPAPSK2" == s then
+                    return "psk+psk2"
+                elseif "WPAPSK2" == s then
+                    return "psk2"
+                elseif "WPAPSK" == s then
+                    return "psk"
+                else
+                    return "none"
+                end 
+            end
+            local enc = get_enc(encmode)
+            if "none" == enc then
+                uci:set(wire,name,"key","") 
+            else
+                uci:set(wire,name,"key",pwd)
+            end
+            uci:set(wire,name,"encryption",enc) 
+            uci:commit(wire) 
+            D("set_netinfo")
+            local apcli = util.exec([[ifconfig | grep apcli0 | awk '{print $1}']])
+            if "" ~= apcli then
+                local function get_enctype(s)
+                    if "MIXED-WPAPSK2" == s then
+                        return "WPA2PSK","AES"
+                    elseif "WPAPSK2" == s then
+                        return "WPA2PSK","AES"
+                    elseif "WPAPSK" == s then
+                        return "WPAPSK","AES"
+                    else
+                        return "OPEN","NONE"
+                    end 
+                end
+                local m,t=get_enctype(encmode)
+                local cmd=nil
+                local pwdcmd=""
+                if "OPEN" ~= m then
+                    pwdcmd=string.format("wpriv apcli0 set ApCliWPAPSK=%s;",pwd)
+                end 
+                cmd=string.format([[iwpriv ra0 set Channel=%d;iwpriv apcli0 set ApCliEnable=0;iwpriv apcli0 set ApCliAuthMode=%s;iwpriv apcli0 set ApCliEncrypType=%s;iwpriv apcli0 set ApCliSsid=%s;%s iwpriv apcli0 set ApCliEnable=1]],ch,m,t,ssid,pwdcmd)
+                os.execute(cmd)
+                D(cmd)
+            else
+                os.execute("wifi >/dev/null 2>&1 &")
+                D("netinfo wifi")
+            end
+            Qlink_ackQlinkNetinfo()
+        end
+    end
+end
+
+if arg and arg[1] == "-q" then
+    if 0 == os.execute("test -f /tmp/qlink.pid") then
+        return 1
+    end
+    os.execute([[touch /tmp/qlink.pid && sleep 120 && rm /tmp/qlink.pid &]])
+    os.execute("killall check >/dev/null 2>&1")
+    set_qlink()
+    --sleep(2)
+    --search_channel()
+    search_channel2()
+    os.execute("rm /tmp/qlink.pid &")
+    os.execute("check >/dev/null 2>&1 &")
+elseif arg and "-s" == arg[1] and arg[2] then
+     local d=json.decode(arg[2])
+     set_gateway_netinfo(d)
+--else
+--     get_hidden_signal_channel()
+end

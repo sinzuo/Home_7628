@@ -64,6 +64,9 @@ void log_print(coap_log_t level, const char *message){
     fflush(log_fd);
     fclose(log_fd);
 }
+void log_null(coap_log_t level, const char *message){
+}
+
 /* SIGINT handler: set quit to 1 for graceful termination */
 static void
 handle_sigint(int signum UNUSED_PARAM) {
@@ -224,8 +227,10 @@ main(int argc, char **argv) {
             exit(1);
         }
     }
-    if(!foreground){
+    if(1 == foreground){
         coap_set_log_handler(log_print);
+    }else{
+        coap_set_log_handler(log_null);
     }
     coap_set_log_level(log_level);
 

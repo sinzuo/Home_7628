@@ -19,7 +19,7 @@
 #include <coap/coap.h>
 #include <coap/coap_dtls.h>
 
-
+time_t g_timeout = 3;
 
 #ifndef min
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -31,7 +31,7 @@ void usage(const char *program){
     if ( p ){
         program = ++p;
     }
-    fprintf(stderr,"Usage: %s <url>\n" 
+    fprintf(stderr,"Usage: %s [-t timeout] <url>\n" 
         "examples:\n"
         "\t%s coap://192.168.1.1\n",program,program);
 }
@@ -96,7 +96,7 @@ static int ping_send(const char *addr,const int port,char *data,uint32_t datalen
 		printf("socket error\n");
 		return -1;
 	}   
-        struct timeval timeout = {3,0};
+        struct timeval timeout = {g_timeout,0};
         //wait for 3s
         if( setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,&timeout,sizeof(timeout) ) < 0 )
         {    
@@ -158,19 +158,17 @@ coap_pdu_t *ping_pdu(){
 int main(int argc,char *argv[]){
     str payload={0,NULL};
     coap_uri_t uri;
-    /*
     int opt;
-    while ((opt = getopt(argc, argv, "e:")) != -1) {
+    while ((opt = getopt(argc, argv, "t:")) != -1) {
         switch (opt) {
-        case 'e':
-            if (!cmdline_input(optarg, &payload));
+        case 't':
+            g_timeout = atoi(optarg);
             break;
         default:
             usage(argv[0]);
             exit(1);
         }
     }
-    */
     if (optind < argc) {
         if (coap_split_uri((unsigned char *)argv[optind], strlen(argv[optind]), &uri) < 0) {
           coap_log(LOG_ERR, "invalid CoAP URI\n");

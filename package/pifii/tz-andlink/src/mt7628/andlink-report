@@ -6,7 +6,7 @@ local uci = luci.model.uci.cursor()
 
 --log 
 local log_file = "/tmp/tzandlinkreport.log"
-local log_flag = 0 -- nil:don't print log,0:print log to file,1: print log to stdout 
+local log_flag = nil -- nil:don't print log,0:print log to file,1: print log to stdout 
 local log_max = 5000 --max line num
 
 function log_info(info)
@@ -116,6 +116,18 @@ function get_broadcast(ip,mask)
     end
     return bc
 end
+function get_mac()
+    local ifa = util.ubus("network.interface.lan","status")
+    local mac = nil
+    if ifa and "dhcp" ~= ifa.proto then --router mode
+        ifa = util.ubus("network.interface.wan","status")
+    end
+    if ifa and ifa["device"] then
+        mac = util.exec(string.format([[ifconfig %s | grep HWaddr | awk '{print $5}' | tr -d ':|\n']],ifa["device"]))
+    end
+    return mac
+end
+local g_mac = get_mac()
 
 function get_sn(mac)
     local sn = util.exec([[test -f /usr/bin/sncfg && sncfg -r | tr -d "\n"]])
@@ -128,23 +140,8 @@ function get_sn(mac)
         return string.format("%08dA%08d",tonumber(mh,16),tonumber(mt,16))
     end
 end
+g_sn = get_sn(g_mac) --"C170710010116021863",
 
---function get_mac()
---    local mac=util.exec([[dd bs=1 skip=4 count=6 if=/dev/mtdblock2 2>/dev/null | hexdump -vC|grep 00000000|awk '{printf("%s",toupper($2$3$4$5$6$7))}']]);
---    return mac
---end
-
-function get_mac()
-    local ifa = util.ubus("network.interface.lan","status")
-    local mac = nil
-    if ifa and "dhcp" ~= ifa.proto then --router mode
-        ifa = util.ubus("network.interface.wan","status")
-    end
-    if ifa and ifa["device"] then
-        mac = util.exec(string.format([[ifconfig %s | grep HWaddr | awk '{print $5}' | tr ':|\n']],ifa["device"]))
-    end
-    return mac
-end
 
 function get_device_ip()
     local ifa = util.ubus("network.interface.lan","status")
@@ -168,11 +165,14 @@ function get_online_data()
     end
     --local sm=util.exec([[cat /tmp/sysinfo/board_name | tr -d "\n"]]) or ""
     local sv=util.exec([[cat /etc/openwrt_version | tr -d "\n|\r"]])
-    local devmac = get_mac()
+    local devmac = g_mac --get_mac()
+    local apUplinkType="Ethernet"
+    local apcli0mac=util.exec([[iwinfo apcli0 i | grep "Access Point" | awk '{print $3}' | tr -d '\n']])
+    if "00:00:00:00:00:00" ~= apcli0mac then apUplinkType = "WLAN" end
     local d = {
               deviceId = devid,
               --deviceMac = devmac,
-              deviceType = uci:get("andlink","andlink","devicetype") or "30932", 
+              deviceType = uci:get("andlink","andlink","devicetype") or "30103",
               --firmwareVersion = sm.."_"..sv,--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
               firmwareVersion = sv,--util.exec([[grep hw_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
               softwareVersion = sv,--util.exec([[grep soft_version= /etc/sysinfo.conf | awk -F= '{printf("%s",$2)}']]),
@@ -180,10 +180,10 @@ function get_online_data()
               timestamp = os.time(),
               XData = {
                       deviceMac = devmac,
-                      deviceVendor = "SZTozed",
-                      deviceModel = uci:get("andlink","andlink","devicemodel") or "ZY366TZ",
-                      deviceSn = get_sn(devmac), --"C170710010116021863",
-                      apUplinkType = "Ethernet",
+                      deviceVendor = util.exec([[grep DEVICE_MANUFACTURER /etc/device_info | awk -F= '{print $2}' | tr -d "\'|\n"]]),
+                      deviceModel = util.exec([[grep DEVICE_PRODUCT /etc/device_info | awk -F= '{print $2}' | tr -d "\'|\n"]]),
+                      deviceSn = g_sn, --get_sn(devmac), --"C170710010116021863",
+                      apUplinkType = apUplinkType,
                       radio5 = 0,
                       SyncCode = uci:get("andlink","andlink","sysc_code") or "0"
               }
@@ -235,8 +235,8 @@ function coap_device_register(gwip)
     local recv_t=nil; 
     --device register 
     --if not devid or "" == devid then
-        local dt=uci:get("andlink","andlink","devicetype") or "30932"
-        local ptoken=uci:get("andlink","andlink","producttoken") or "4Ojrv9Sm6Fgblsxm"
+        local dt=uci:get("andlink","andlink","devicetype") or "30103"
+        local ptoken=uci:get("andlink","andlink","producttoken") or "1ImttzrB9t3aShra"
         local register_t={
                   deviceMac=get_mac(),
                   deviceType=dt,
